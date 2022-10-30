@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: compage-template-go
+  labels:
+    app: compage-template-go
+  name: compage-template-go
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: compage-template-go
+  type: ClusterIP
