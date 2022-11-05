@@ -3,10 +3,12 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kube-tarian/compage-template-go/pkg/models"
-	"github.com/kube-tarian/compage-template-go/pkg/service"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/service"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
+
+var userService = service.UserService{}
 
 func CreateUser(context *gin.Context) {
 	// validate input
@@ -16,8 +18,6 @@ func CreateUser(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	userService := service.UserService{}
 
 	// trigger user creation
 	if err := userService.CreateUser(input); err != nil {
@@ -40,8 +40,6 @@ func UpdateUser(context *gin.Context) {
 
 	id := context.Param("id")
 
-	userService := service.UserService{}
-
 	// trigger user updation
 	if err := userService.UpdateUser(id, input); err != nil {
 		log.Error(err)
@@ -54,8 +52,6 @@ func UpdateUser(context *gin.Context) {
 
 func GetUser(context *gin.Context) {
 	id := context.Param("id")
-
-	userService := service.UserService{}
 
 	// trigger user fetching
 	user, err := userService.GetUser(id)
@@ -71,8 +67,6 @@ func GetUser(context *gin.Context) {
 func DeleteUser(context *gin.Context) {
 	id := context.Param("id")
 
-	userService := service.UserService{}
-
 	// trigger user deletion
 	if err := userService.DeleteUser(id); err != nil {
 		log.Error(err)
@@ -86,8 +80,6 @@ func DeleteUser(context *gin.Context) {
 }
 
 func ListUsers(context *gin.Context) {
-	userService := service.UserService{}
-
 	// trigger all users fetching
 	users, err := userService.ListUsers()
 	if err != nil {

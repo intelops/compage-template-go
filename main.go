@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/kube-tarian/compage-template-go/pkg/controller"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/controller"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sinhashubham95/go-actuator"
 	log "github.com/sirupsen/logrus"
