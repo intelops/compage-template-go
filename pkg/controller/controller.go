@@ -98,3 +98,20 @@ func ListUsers(context *gin.Context) {
 
 	context.JSON(http.StatusOK, users)
 }
+
+func PatchUser(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "PATCH",
+	})
+}
+func OptionsUser(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "OPTIONS",
+	})
+}
+
+func HeadUser(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "HEAD",
+	})
+}
