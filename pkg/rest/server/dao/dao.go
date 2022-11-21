@@ -2,7 +2,7 @@ package dao
 
 import (
 	"errors"
-	"github.com/kube-tarian/compage-template-go/pkg/models"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
 )
 
 var users = make(map[string]models.User)

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/kube-tarian/compage-template-go/pkg/models"
 	"github.com/kube-tarian/compage-template-go/pkg/rest/server/dao"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
 )
 
 type UserService struct {

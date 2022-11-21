@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kube-tarian/compage-template-go/pkg/models"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
 	"github.com/kube-tarian/compage-template-go/pkg/rest/server/service"
 	log "github.com/sirupsen/logrus"
 	"net/http"
