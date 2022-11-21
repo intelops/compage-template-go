@@ -1,14 +1,14 @@
-package service
+package services
 
 import (
-	"github.com/kube-tarian/compage-template-go/pkg/rest/server/dao"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/daos"
 	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
 )
 
 type UserService struct {
 }
 
-var userDao = dao.UserDao{}
+var userDao = daos.UserDao{}
 
 func (userService *UserService) CreateUser(user models.User) error {
 	return userDao.CreateUser(user)

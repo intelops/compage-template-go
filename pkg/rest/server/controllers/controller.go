@@ -1,14 +1,14 @@
-package controller
+package controllers
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
-	"github.com/kube-tarian/compage-template-go/pkg/rest/server/service"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/services"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-var userService = service.UserService{}
+var userService = services.UserService{}
 
 func CreateUser(context *gin.Context) {
 	// validate input

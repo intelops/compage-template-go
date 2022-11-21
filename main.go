@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/kube-tarian/compage-template-go/pkg/rest/server/controller"
+	"github.com/kube-tarian/compage-template-go/pkg/rest/server/controllers"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sinhashubham95/go-actuator"
 	log "github.com/sirupsen/logrus"
@@ -45,14 +45,14 @@ func main() {
 
 	v1 := router.Group("/v1")
 	{
-		v1.GET("/users/:id", controller.GetUser)
-		v1.POST("/users", controller.CreateUser)
-		v1.PUT("/users/:id", controller.UpdateUser)
-		v1.DELETE("/users/:id", controller.DeleteUser)
-		v1.GET("/users", controller.ListUsers)
-		v1.PATCH("/users/:id", controller.PatchUser)
-		v1.HEAD("/users", controller.HeadUser)
-		v1.OPTIONS("/users", controller.OptionsUser)
+		v1.GET("/users/:id", controllers.GetUser)
+		v1.POST("/users", controllers.CreateUser)
+		v1.PUT("/users/:id", controllers.UpdateUser)
+		v1.DELETE("/users/:id", controllers.DeleteUser)
+		v1.GET("/users", controllers.ListUsers)
+		v1.PATCH("/users/:id", controllers.PatchUser)
+		v1.HEAD("/users", controllers.HeadUser)
+		v1.OPTIONS("/users", controllers.OptionsUser)
 	}
 
 	// call external client here if the isClient value is true
@@ -107,7 +107,7 @@ func initTracer() func(context.Context) error {
 	resources, err := resource.New(
 		context.Background(),
 		resource.WithAttributes(
-			attribute.String("service.name", serviceName),
+			attribute.String("services.name", serviceName),
 			attribute.String("library.language", "go"),
 		),
 	)
