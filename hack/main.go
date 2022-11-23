@@ -27,12 +27,15 @@ func listProjectFiles(projectDirectoryPath string) []string {
 	return files
 }
 
+func getIgnorablePaths() []string {
+	return []string{".git", ".keep", "hack", ".keep", ".idea", "compage-template-go"}
+}
+
 func IgnorablePaths(path string) bool {
-	if strings.Contains(path, ".git") || strings.Contains(path, ".idea") || strings.Contains(path, "hack") || strings.Contains(path, ".keep") {
-		if strings.Contains(path, ".gitignore") {
-			return false
+	for _, ignorablePath := range getIgnorablePaths() {
+		if strings.Contains(path, ignorablePath) {
+			return true
 		}
-		return true
 	}
 	return false
 }
