@@ -1,2 +1,2 @@
-compage-template-go
+{{.NodeName}}
 .idea

@@ -1,24 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: compage-template-go
-  name: compage-template-go
+  namespace: {{.NodeName}}
+  name: {{.NodeName}}
   labels:
-    app: compage-template-go
+    app: {{.NodeName}}
 spec:
   selector:
     matchLabels:
-      app: compage-template-go
+      app: {{.NodeName}}
   template:
     metadata:
       labels:
-        app: compage-template-go
-        name: compage-template-go
+        app: {{.NodeName}}
+        name: {{.NodeName}}
     spec:
       containers:
-        - name: compage-template-go
-          image: mahendraintelops/compage-template-go
+        - name: {{.NodeName}}
+          image: mahendraintelops/{{.NodeName}}
           imagePullPolicy: Always
+       {{if .IsServer }}
           env:
             - name: SERVICE_NAME
               value: "go-app"
@@ -27,7 +28,7 @@ spec:
             - name: INSECURE_MODE
               value: "true"
           ports:
-            - containerPort: 8080
+            - containerPort: {{.ServerPort}}
               name: http
           readinessProbe:
             tcpSocket:
@@ -39,3 +40,4 @@ spec:
               port: http
             initialDelaySeconds: 15
             periodSeconds: 30
+        {{end}}

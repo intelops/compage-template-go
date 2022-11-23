@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/kube-tarian/compage-template-go/pkg/rest/server/controllers"
+	"github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sinhashubham95/go-actuator"
 	log "github.com/sirupsen/logrus"
@@ -43,21 +43,23 @@ func main() {
 	// add prometheus
 	addPrometheus(router)
 
-	v1 := router.Group("/v1")
-	{
-		v1.GET("/{{.ResourceNamePlural}}/:id", controllers.Get{{.ResourceName}})
-		v1.POST("/{{.ResourceNamePlural}}", controllers.Create{{.ResourceName}})
-		v1.PUT("/{{.ResourceNamePlural}}/:id", controllers.Update{{.ResourceName}})
-		v1.DELETE("/{{.ResourceNamePlural}}/:id", controllers.Delete{{.ResourceName}})
-		v1.GET("/{{.ResourceNamePlural}}", controllers.List{{.ResourceName}}s)
-		v1.PATCH("/{{.ResourceNamePlural}}/:id", controllers.Patch{{.ResourceName}})
-		v1.HEAD("/{{.ResourceNamePlural}}", controllers.Head{{.ResourceName}})
-		v1.OPTIONS("/{{.ResourceNamePlural}}", controllers.Options{{.ResourceName}})
-	}
+    v1 := router.Group("/v1")
+    {
+        {{range $i, $v := .Resources}}
+            v1.GET("/{{$v.ResourceNamePlural}}/:id", controllers.Get{{$v.ResourceName}})
+            v1.POST("/{{$v.ResourceNamePlural}}", controllers.Create{{$v.ResourceName}})
+            v1.PUT("/{{$v.ResourceNamePlural}}/:id", controllers.Update{{$v.ResourceName}})
+            v1.DELETE("/{{$v.ResourceNamePlural}}/:id", controllers.Delete{{$v.ResourceName}})
+            v1.GET("/{{$v.ResourceNamePlural}}", controllers.List{{$v.ResourceName}}s)
+            v1.PATCH("/{{$v.ResourceNamePlural}}/:id", controllers.Patch{{$v.ResourceName}})
+            v1.HEAD("/{{$v.ResourceNamePlural}}", controllers.Head{{$v.ResourceName}})
+            v1.OPTIONS("/{{$v.ResourceNamePlural}}", controllers.Options{{$v.ResourceName}})
+        {{end}}
+    }
 
 	// call external client here if the isClient value is true
 
-	Port := ":8080"
+	Port := ":{{.ServerPort}}"
 	if err := router.Run(Port); err != nil {
 		return
 	}
@@ -77,8 +79,8 @@ func addActuator(router *gin.Engine) {
 		actuator.ThreadDump,
 	},
 		Env:     "dev",
-		Name:    "compage-template-go",
-		Port:    8080,
+		Name:    "{{.NodeName}}",
+		Port:    {{.ServerPort}},
 		Version: "0.0.1",
 	})
 	ginActuatorHandler := func(ctx *gin.Context) {

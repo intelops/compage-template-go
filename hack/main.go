@@ -28,7 +28,7 @@ func listProjectFiles(projectDirectoryPath string) []string {
 }
 
 func getIgnorablePaths() []string {
-	return []string{".git", ".keep", "hack", ".keep", ".idea", "compage-template-go"}
+	return []string{".git", ".keep", "hack", ".keep", ".idea", "{{.NodeName}}"}
 }
 
 func IgnorablePaths(path string) bool {
