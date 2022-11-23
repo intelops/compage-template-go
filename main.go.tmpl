@@ -45,14 +45,14 @@ func main() {
 
 	v1 := router.Group("/v1")
 	{
-		v1.GET("/users/:id", controllers.GetUser)
-		v1.POST("/users", controllers.CreateUser)
-		v1.PUT("/users/:id", controllers.UpdateUser)
-		v1.DELETE("/users/:id", controllers.DeleteUser)
-		v1.GET("/users", controllers.ListUsers)
-		v1.PATCH("/users/:id", controllers.PatchUser)
-		v1.HEAD("/users", controllers.HeadUser)
-		v1.OPTIONS("/users", controllers.OptionsUser)
+		v1.GET("/{{.ResourceNamePlural}}/:id", controllers.Get{{.ResourceName}})
+		v1.POST("/{{.ResourceNamePlural}}", controllers.Create{{.ResourceName}})
+		v1.PUT("/{{.ResourceNamePlural}}/:id", controllers.Update{{.ResourceName}})
+		v1.DELETE("/{{.ResourceNamePlural}}/:id", controllers.Delete{{.ResourceName}})
+		v1.GET("/{{.ResourceNamePlural}}", controllers.List{{.ResourceName}}s)
+		v1.PATCH("/{{.ResourceNamePlural}}/:id", controllers.Patch{{.ResourceName}})
+		v1.HEAD("/{{.ResourceNamePlural}}", controllers.Head{{.ResourceName}})
+		v1.OPTIONS("/{{.ResourceNamePlural}}", controllers.Options{{.ResourceName}})
 	}
 
 	// call external client here if the isClient value is true

@@ -5,48 +5,48 @@ import (
 	"github.com/kube-tarian/compage-template-go/pkg/rest/server/models"
 )
 
-var users = make(map[string]models.User)
+var {{.ResourceNamePlural}} = make(map[string]models.{{.ResourceName}})
 
-type UserDao struct {
+type {{.ResourceName}}Dao struct {
 }
 
-func (userDao *UserDao) CreateUser(user models.User) error {
-	users[user.Id] = user
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
+	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
 
 	return nil
 }
 
-func (userDao *UserDao) UpdateUser(id string, user models.User) error {
-	if id != user.Id {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
+	if id != {{.ResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-	users[user.Id] = user
+	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
 
 	return nil
 }
 
-func (userDao *UserDao) DeleteUser(id string) error {
-	if _, ok := users[id]; ok {
-		delete(users, id)
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}}(id string) error {
+	if _, ok := {{.ResourceNamePlural}}[id]; ok {
+		delete({{.ResourceNamePlural}}, id)
 		return nil
 	}
 
-	return errors.New("user not found")
+	return errors.New("{{.ResourceNameSingular}} not found")
 }
 
-func (userDao *UserDao) ListUsers() ([]models.User, error) {
-	v := make([]models.User, len(users))
-	for _, value := range users {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
+	v := make([]models.{{.ResourceName}}, len({{.ResourceNamePlural}}))
+	for _, value := range {{.ResourceNamePlural}} {
 		v = append(v, value)
 	}
 
 	return v, nil
 }
 
-func (userDao *UserDao) GetUser(id string) (models.User, error) {
-	if user, ok := users[id]; ok {
-		return user, nil
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id string) (models.{{.ResourceName}}, error) {
+	if {{.ResourceNameSingular}}, ok := {{.ResourceNamePlural}}[id]; ok {
+		return {{.ResourceNameSingular}}, nil
 	}
 
-	return models.User{}, errors.New("user not found")
+	return models.{{.ResourceName}}{}, errors.New("{{.ResourceNameSingular}} not found")
 }
