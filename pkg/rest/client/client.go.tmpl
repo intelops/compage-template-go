@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func execute() ([]byte, error) {
+func Execute() ([]byte, error) {
 	response, err := http.Get("{{.ClientServiceName}}:{{.ClientPort}}/ping")
 
 	if err != nil {

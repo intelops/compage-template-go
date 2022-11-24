@@ -24,8 +24,9 @@ FROM gcr.io/distroless/base-debian10 as production
 # Copy application binary from build/dev stage to the distroless container
 COPY --from=build /app/main /
 
+{{if .IsServer }}
 # Application port (optional)
 EXPOSE {{.ServerPort}}
-
+{{end}}
 # Container start command for production
 CMD ["/main"]

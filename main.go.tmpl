@@ -1,38 +1,30 @@
 package main
 
 import (
-	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/sinhashubham95/go-actuator"
-	log "github.com/sirupsen/logrus"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc/credentials"
-	"os"
+	{{if .IsServer }}
+    "context"
+    "github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+    "github.com/gin-gonic/gin"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
+    "github.com/sinhashubham95/go-actuator"
+    log "github.com/sirupsen/logrus"
+    "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/attribute"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+    "go.opentelemetry.io/otel/sdk/resource"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+    "google.golang.org/grpc/credentials"
+  	"os"
+    {{else}}
+    "fmt"
+    "github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
+    {{end}}
 )
-
-var (
-	serviceName  = os.Getenv("SERVICE_NAME")
-	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	insecure     = os.Getenv("INSECURE_MODE")
-)
-
-func prometheusHandler() gin.HandlerFunc {
-	h := promhttp.Handler()
-
-	return func(c *gin.Context) {
-		h.ServeHTTP(c.Writer, c.Request)
-	}
-}
 
 func main() {
+  {{if .IsServer }}
 	router := gin.Default()
 	// add opentel
 	cleanup := initTracer()
@@ -62,6 +54,29 @@ func main() {
 	Port := ":{{.ServerPort}}"
 	if err := router.Run(Port); err != nil {
 		return
+	}
+   {{else}}
+    b, err := client.Execute()
+    if err!=nil {
+        return
+    }
+    fmt.Println("Response received : ", string(b))
+   {{end}}
+}
+
+{{if .IsServer }}
+
+var (
+	serviceName  = os.Getenv("SERVICE_NAME")
+	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	insecure     = os.Getenv("INSECURE_MODE")
+)
+
+func prometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
@@ -140,3 +155,5 @@ func init() {
 	// Only log the warning severity or above.
 	log.SetLevel(log.InfoLevel)
 }
+
+{{end}}
