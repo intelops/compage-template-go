@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{.NodeName}}
-          image: mahendraintelops/{{.NodeName}}
+          image: {{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
           imagePullPolicy: Always
        {{if .IsServer }}
           env:

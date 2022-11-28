@@ -3,7 +3,7 @@ package main
 import (
 	{{if .IsServer }}
     "context"
-    "github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
     "github.com/gin-gonic/gin"
     "github.com/prometheus/client_golang/prometheus/promhttp"
     "github.com/sinhashubham95/go-actuator"
@@ -19,7 +19,7 @@ import (
   	"os"
     {{else}}
     "fmt"
-    "github.com/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
     {{end}}
 )
 
