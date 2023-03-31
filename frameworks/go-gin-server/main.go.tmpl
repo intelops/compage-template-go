@@ -55,12 +55,13 @@ func main() {
 	if err := router.Run(Port); err != nil {
 		return
 	}
-   {{else}}
+   {{end}}
+   {{if .IsClient }}
     b, err := client.Execute()
     if err!=nil {
         return
     }
-    fmt.Println("Response received : ", string(b))
+    log.Printf("Response received: %s", string(b))
    {{end}}
 }
 

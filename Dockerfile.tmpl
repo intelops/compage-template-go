@@ -1,13 +1,13 @@
 ################ Build & Dev ################
 # Build stage will be used:
 # - for building the application for production
-FROM golang:1.19.2-alpine as build
+FROM golang:1.20.2-alpine3.17 as build
 
 # Create project directory (workdir)
 WORKDIR /app
 
-# Add source code files to WORKDIR
-ADD . .
+# Copy source code files to WORKDIR
+COPY . .
 
 # Build application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
