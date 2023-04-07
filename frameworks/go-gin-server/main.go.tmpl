@@ -1,7 +1,7 @@
 package main
 
 import (
-	{{if .IsServer }}
+	{{if .IsRestServer }}
     "context"
     "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
     "github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-  {{if .IsServer }}
+  {{if .IsRestServer }}
 	router := gin.Default()
 	// add opentel
 	cleanup := initTracer()
@@ -49,14 +49,14 @@ func main() {
         {{end}}
     }
 
-	// call external client here if the isClient value is true
+	// call external client here if the isRestClient value is true
 
-	Port := ":{{.ServerPort}}"
+	Port := ":{{.RestServerPort}}"
 	if err := router.Run(Port); err != nil {
 		return
 	}
    {{end}}
-   {{if .IsClient }}
+   {{if .IsRestClient }}
     b, err := client.Execute()
     if err!=nil {
         return
@@ -65,7 +65,7 @@ func main() {
    {{end}}
 }
 
-{{if .IsServer }}
+{{if .IsRestServer }}
 
 var (
 	serviceName  = os.Getenv("SERVICE_NAME")
@@ -96,7 +96,7 @@ func addActuator(router *gin.Engine) {
 	},
 		Env:     "dev",
 		Name:    "{{.NodeName}}",
-		Port:    {{.ServerPort}},
+		Port:    {{.RestServerPort}},
 		Version: "0.0.1",
 	})
 	ginActuatorHandler := func(ctx *gin.Context) {

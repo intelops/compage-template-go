@@ -19,7 +19,7 @@ spec:
         - name: {{.NodeName}}
           image: {{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
           imagePullPolicy: Always
-       {{if .IsServer }}
+       {{if .IsRestServer }}
           env:
             - name: SERVICE_NAME
               value: "go-app"
@@ -28,7 +28,7 @@ spec:
             - name: INSECURE_MODE
               value: "true"
           ports:
-            - containerPort: {{.ServerPort}}
+            - containerPort: {{.RestServerPort}}
               name: http
           readinessProbe:
             tcpSocket:

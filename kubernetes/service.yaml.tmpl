@@ -8,8 +8,8 @@ metadata:
 spec:
   ports:
     - protocol: TCP
-      port: {{.ServerPort}}
-      targetPort: {{.ServerPort}}
+      port: {{.RestServerPort}}
+      targetPort: {{.RestServerPort}}
   selector:
     app: {{.NodeName}}
   type: ClusterIP

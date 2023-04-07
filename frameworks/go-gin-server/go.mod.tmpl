@@ -2,7 +2,7 @@ module github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
 
 go 1.19
 
-{{if .IsServer }}
+{{if .IsRestServer }}
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/prometheus/client_golang v1.13.0
