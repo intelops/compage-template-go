@@ -28,7 +28,9 @@ func main() {
 	router := gin.Default()
 	// add opentel
 	cleanup := initTracer()
-	defer cleanup(context.Background())
+    defer func(func(context.Context) error) {
+        _ = cleanup(context.Background())
+    }(cleanup)
 	router.Use(otelgin.Middleware(serviceName))
 	// add actuator
 	addActuator(router)
