@@ -8,7 +8,7 @@ import (
 )
 
 type {{.ResourceName}}Dao struct {
-	sql_client *sql_client.MySQLRepository
+	sql_client *sql_client.MySQLClient
 }
 
 func New{{.ResourceName}}Dao() (*{{.ResourceName}}Dao, error) {

@@ -8,7 +8,7 @@ import (
 )
 
 type {{.ResourceName}}Dao struct {
-	sql_client *sql_client.SQLiteRepository
+	sql_client *sql_client.SQLiteClient
 }
 
 func New{{.ResourceName}}Dao() (*{{.ResourceName}}Dao, error) {
