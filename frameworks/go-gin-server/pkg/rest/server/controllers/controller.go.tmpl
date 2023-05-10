@@ -6,9 +6,10 @@ import (
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/services"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+    "strconv"
 )
 
-var {{.ResourceNameSingular}}Service = services.{{.ResourceName}}Service{}
+var {{.ResourceNameSingular}}Service = services.New{{.ResourceName}}Service()
 
 func Create{{.ResourceName}}(context *gin.Context) {
 	// validate input
@@ -38,7 +39,12 @@ func Update{{.ResourceName}}(context *gin.Context) {
 		return
 	}
 
-	id := context.Param("id")
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// trigger {{.ResourceNameSingular}} updation
 	if err := {{.ResourceNameSingular}}Service.Update{{.ResourceName}}(id, input); err != nil {
@@ -51,7 +57,12 @@ func Update{{.ResourceName}}(context *gin.Context) {
 }
 
 func Get{{.ResourceName}}(context *gin.Context) {
-	id := context.Param("id")
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// trigger {{.ResourceNameSingular}} fetching
 	{{.ResourceNameSingular}}, err := {{.ResourceNameSingular}}Service.Get{{.ResourceName}}(id)
@@ -65,7 +76,12 @@ func Get{{.ResourceName}}(context *gin.Context) {
 }
 
 func Delete{{.ResourceName}}(context *gin.Context) {
-	id := context.Param("id")
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// trigger {{.ResourceNameSingular}} deletion
 	if err := {{.ResourceNameSingular}}Service.Delete{{.ResourceName}}(id); err != nil {

@@ -27,4 +27,8 @@ http://localhost:8080/v1/users/123
 curl -X DELETE -H "Content-Type: application/json" \
 http://localhost:8080/v1/users/123
 
+# when mysql throws error about server connection, fire below commands
+# CREATE USER 'root'@'%' IDENTIFIED BY 'password';
+# GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+
 {{end}}

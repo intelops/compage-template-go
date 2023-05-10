@@ -1,3 +1,4 @@
 {{.NodeName}}
 ../.idea
 .devspace
+/sqlite.db

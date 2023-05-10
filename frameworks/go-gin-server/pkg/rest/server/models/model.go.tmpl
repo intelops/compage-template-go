@@ -1,6 +1,7 @@
 package models
 
 type {{.ResourceName}} struct {
+    Id int64
     {{range $k, $v := .Fields}}
     {{$k}} {{$v}}
     {{end}}
