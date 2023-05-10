@@ -8,6 +8,13 @@ import (
 	"os"
 )
 
+var (
+	ErrDuplicate    = errors.New("record already exists")
+	ErrNotExists    = errors.New("row not exists")
+	ErrUpdateFailed = errors.New("update failed")
+	ErrDeleteFailed = errors.New("delete failed")
+)
+
 const fileName = "sqlite.db"
 
 type SQLiteClient struct {
