@@ -25,17 +25,17 @@ var (
 	database = os.Getenv("MYSQL_DB_DATABASE")
 )
 
-type MySQLRepository struct {
+type MySQLClient struct {
 	db *sql.DB
 }
 
-func NewMySQLRepository(db *sql.DB) *MySQLRepository {
-	return &MySQLRepository{
+func NewMySQLClient(db *sql.DB) *MySQLClient {
+	return &MySQLClient{
 		db: db,
 	}
 }
 
-func (r *MySQLRepository) Migrate() error {
+func (r *MySQLClient) Migrate() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS {{.ResourceNamePlural}}(
 		ID int NOT NULL AUTO_INCREMENT,
@@ -50,7 +50,7 @@ func (r *MySQLRepository) Migrate() error {
 	return err
 }
 
-func (r *MySQLRepository) Create(m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
+func (r *MySQLClient) Create(m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
 	insertQuery := "INSERT INTO {{.ResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
 	res, err := r.db.Exec(insertQuery, {{.InsertQueryExecColumns}})
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *MySQLRepository) Create(m models.{{.ResourceName}}) (*models.{{.Resourc
 	return &m, nil
 }
 
-func (r *MySQLRepository) All() ([]models.{{.ResourceName}}, error) {
+func (r *MySQLClient) All() ([]models.{{.ResourceName}}, error) {
 	selectQuery := "SELECT * FROM {{.ResourceNamePlural}}"
 	rows, err := r.db.Query(selectQuery)
 	if err != nil {
@@ -93,7 +93,7 @@ func (r *MySQLRepository) All() ([]models.{{.ResourceName}}, error) {
 	return all, nil
 }
 
-func (r *MySQLRepository) Update(id int64, m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
+func (r *MySQLClient) Update(id int64, m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
 	if id == 0 {
 		return nil, errors.New("invalid updated ID")
 	}
@@ -115,7 +115,7 @@ func (r *MySQLRepository) Update(id int64, m models.{{.ResourceName}}) (*models.
 	return &m, nil
 }
 
-func (r *MySQLRepository) Delete(id int64) error {
+func (r *MySQLClient) Delete(id int64) error {
 	deleteQuery := "DELETE FROM {{.ResourceNamePlural}} WHERE Id = ?"
 	res, err := r.db.Exec(deleteQuery, id)
 	if err != nil {
@@ -134,7 +134,7 @@ func (r *MySQLRepository) Delete(id int64) error {
 	return err
 }
 
-func (r *MySQLRepository) Get(id int64) (*models.{{.ResourceName}}, error) {
+func (r *MySQLClient) Get(id int64) (*models.{{.ResourceName}}, error) {
 	selectQuery := "SELECT * FROM {{.ResourceNamePlural}} WHERE Id = ?"
 	row := r.db.QueryRow(selectQuery, id)
 
@@ -148,7 +148,7 @@ func (r *MySQLRepository) Get(id int64) (*models.{{.ResourceName}}, error) {
 	return &m, nil
 }
 
-func InitMySQLDB() (*MySQLRepository, error) {
+func InitMySQLDB() (*MySQLClient, error) {
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database)
 	db, err := sql.Open("mysql", dataSource)
 	if err != nil {
@@ -158,11 +158,11 @@ func InitMySQLDB() (*MySQLRepository, error) {
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
 
-	mySQLRepository := NewMySQLRepository(db)
+	mySQLClient := NewMySQLClient(db)
 
-	if err = mySQLRepository.Migrate(); err != nil {
+	if err = mySQLClient.Migrate(); err != nil {
 		return nil, err
 	}
 
-	return mySQLRepository, nil
+	return mySQLClient, nil
 }

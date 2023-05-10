@@ -1,52 +1,157 @@
-package daos
+package sql_client
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+	"github.com/mattn/go-sqlite3"
+	"os"
 )
 
-var {{.ResourceNamePlural}} = make(map[int64]models.{{.ResourceName}})
+const fileName = "sqlite.db"
 
-type {{.ResourceName}}Dao struct {
+type SQLiteClient struct {
+	db *sql.DB
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
-
-	return nil
-}
-
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id int64, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	if id != {{.ResourceNameSingular}}.Id {
-		return errors.New("id and payload don't match")
+func NewSQLiteClient(db *sql.DB) *SQLiteClient {
+	return &SQLiteClient{
+		db: db,
 	}
-	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
-
-	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}}(id int64) error {
-	if _, ok := {{.ResourceNamePlural}}[id]; ok {
-		delete({{.ResourceNamePlural}}, id)
-		return nil
-	}
-
-	return errors.New("{{.ResourceNameSingular}} not found")
+func (r *SQLiteClient) Migrate() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS {{.ResourceNamePlural}}(
+		Id INTEGER PRIMARY KEY AUTOINCREMENT,
+        {{range $k, $v := .CreateQueryColumns}}
+        {{$k}} {{$v}} NOT NULL,
+        {{end}}
+	)
+	`
+	_, err := r.db.Exec(query)
+	return err
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
-	v := make([]models.{{.ResourceName}}, len({{.ResourceNamePlural}}))
-	for _, value := range {{.ResourceNamePlural}} {
-		v = append(v, value)
-	}
-
-	return v, nil
-}
-
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id int64) (models.{{.ResourceName}}, error) {
-	if {{.ResourceNameSingular}}, ok := {{.ResourceNamePlural}}[id]; ok {
-		return {{.ResourceNameSingular}}, nil
+func (r *SQLiteClient) Create(m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
+	insertQuery := "INSERT INTO {{.ResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
+	res, err := r.db.Exec(insertQuery, {{.InsertQueryExecColumns}})
+	if err != nil {
+		var sqliteErr sqlite3.Error
+		if errors.As(err, &sqliteErr) {
+			if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
+				return nil, ErrDuplicate
+			}
+		}
+		return nil, err
 	}
 
-	return models.{{.ResourceName}}{}, errors.New("{{.ResourceNameSingular}} not found")
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	m.Id = id
+
+	return &m, nil
+}
+
+func (r *SQLiteClient) All() ([]models.{{.ResourceName}}, error) {
+	selectQuery := "SELECT * FROM {{.ResourceNamePlural}}"
+	rows, err := r.db.Query(selectQuery)
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
+
+	var all []models.{{.ResourceName}}
+	for rows.Next() {
+		var m models.{{.ResourceName}}
+    	if err := rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+			return nil, err
+		}
+		all = append(all, m)
+	}
+	if all == nil {
+		all = []models.{{.ResourceName}}{}
+	}
+	return all, nil
+}
+
+func (r *SQLiteClient) Get(id int64) (*models.{{.ResourceName}}, error) {
+	selectQuery := "SELECT * FROM {{.ResourceNamePlural}} WHERE Id = ?"
+	row := r.db.QueryRow(selectQuery, id)
+
+	var m models.{{.ResourceName}}
+	if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotExists
+		}
+		return nil, err
+	}
+	return &m, nil
+}
+
+func (r *SQLiteClient) Update(id int64, m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
+	if id == 0 {
+		return nil, errors.New("invalid updated ID")
+	}
+	updateQuery := "UPDATE {{.ResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
+    res, err := r.db.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	if rowsAffected == 0 {
+		return nil, ErrUpdateFailed
+	}
+
+	return &m, nil
+}
+
+func (r *SQLiteClient) Delete(id int64) error {
+	deleteQuery := "DELETE FROM {{.ResourceNamePlural}} WHERE Id = ?"
+	res, err := r.db.Exec(deleteQuery, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrDeleteFailed
+	}
+
+	return err
+}
+
+func InitSqliteDB() (*SQLiteClient, error) {
+	if _, err := os.Stat(fileName); err == nil {
+		err1 := os.Remove(fileName)
+		if err1 != nil {
+			return nil, err1
+		}
+	}
+
+	db, err := sql.Open("sqlite3", fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	sqLiteClient := NewSQLiteClient(db)
+
+	if err = sqLiteClient.Migrate(); err != nil {
+		return nil, err
+	}
+
+	return sqLiteClient, nil
 }
