@@ -6,7 +6,7 @@ import (
 )
 
 func Execute() ([]byte, error) {
-	response, err := http.Get("{{.ClientServiceName}}:{{.ClientPort}}/ping")
+	response, err := http.Get("{{.RestClientServiceName}}:{{.RestClientPort}}/ping")
 
 	if err != nil {
 		return nil, err
