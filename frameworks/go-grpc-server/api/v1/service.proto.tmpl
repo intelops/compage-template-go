@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package pb;
+option go_package="./api/v1;pb";
+
+service {{ .ResourceName }}Service {
+    rpc Ping (Request) returns (Response) {};
+    rpc Create{{ .ResourceName }} (Create{{ .ResourceName }}Request) returns (Create{{ .ResourceName }}Response) {};
+    rpc Get{{ .ResourceName }} (Get{{ .ResourceName }}Request) returns (Get{{ .ResourceName }}Response) {};
+    rpc Update{{ .ResourceName }} (Update{{ .ResourceName }}Request) returns (Update{{ .ResourceName }}Response) {};
+    rpc Delete{{ .ResourceName }} (Delete{{ .ResourceName }}Request) returns (Delete{{ .ResourceName }}Response) {};
+    rpc List{{ .ResourceName }}s (List{{ .ResourceName }}sRequest) returns (List{{ .ResourceName }}sResponse) {};
+}
+
+message {{.ResourceName}} {
+    string id = 1;{{range $key, $value := .Fields}}
+    {{$value}} {{$key}} = {{counter}};{{end}}
+}
+
+message Create{{ .ResourceName }}Request {
+    {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+}
+
+message Create{{ .ResourceName }}Response {
+    string message = 1;
+}
+
+message Get{{ .ResourceName }}Request {
+    string id = 1;
+}
+
+message Get{{ .ResourceName }}Response {
+    {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+}
+
+message Update{{ .ResourceName }}Request {
+    string id = 1;
+    {{.ResourceName}} {{.ResourceNameSingular}} = 2;
+}
+
+message Update{{ .ResourceName }}Response {
+    string message = 1;
+}
+
+message Delete{{ .ResourceName }}Request {
+    string id = 1;
+}
+
+message Delete{{ .ResourceName }}Response {
+    string message = 1;
+}
+
+message List{{ .ResourceName }}sRequest {
+
+}
+
+message List{{ .ResourceName }}sResponse {
+    repeated {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+}
+
+message Request {}
+
+message Response {
+    string message = 1; 
+}
