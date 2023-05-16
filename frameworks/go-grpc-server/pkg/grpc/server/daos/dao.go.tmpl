@@ -1,0 +1,62 @@
+package daos
+
+import (
+	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+var {{.ResourceNamePlural}} []*pb.{{.ResourceName}}
+
+type {{.ResourceName}}Dao struct {}
+
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+	{{.ResourceNamePlural}} = append({{.ResourceNamePlural}}, {{.ResourceNameSingular}})
+	return nil
+}
+
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id string) (*pb.{{.ResourceName}}, error) {
+    if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id can't be empty")
+	}
+
+	for _, {{.ResourceNameSingular}} := range {{.ResourceNamePlural}} {
+		if {{.ResourceNameSingular}}.Id == id {
+			return {{.ResourceNameSingular}}, nil
+		}
+	}
+
+	return nil, status.Error(codes.Internal,"something went wrong")
+}
+
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+	if id == "" {
+		return status.Error(codes.InvalidArgument, "id can't be empty")
+	}
+
+	for idx, value := range {{.ResourceNamePlural}} {
+		if value.Id == id {
+			{{.ResourceNamePlural}}[idx] = {{.ResourceNameSingular}}
+			return nil
+		}
+	}
+	return status.Error(codes.Internal, "something went wrong")
+}
+
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}}(id string) error {
+	if id == "" {
+		return status.Error(codes.InvalidArgument, "id can't be empty")
+	}
+	for idx, {{.ResourceNameSingular}} := range {{.ResourceNamePlural}} {
+		if {{.ResourceNameSingular}}.Id == id {
+			{{.ResourceNamePlural}} = append({{.ResourceNamePlural}}[:idx], {{.ResourceNamePlural}}[idx+1:]...)
+			return nil
+		}
+	}
+	return status.Error(codes.Internal, "something went wrong")
+}
+
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]*pb.{{.ResourceName}}, error) {
+	return {{.ResourceNamePlural}}, nil
+}

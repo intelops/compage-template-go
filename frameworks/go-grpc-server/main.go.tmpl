@@ -1,0 +1,63 @@
+package main
+
+import (
+	{{if .IsGRPCServer }}
+	"fmt"
+	"log"
+	"net"
+	"os"
+
+	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	{{else}}
+
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/client"
+
+	{{end}}
+)
+
+{{if .IsGRPCServer }}
+var (
+	host = "localhost"
+	port = "{{.gRPCServerPort}}"
+)
+{{end}}
+
+func main() {
+	{{if .IsGRPCServer }}
+	// Set up the TCP listener
+	addr := fmt.Sprintf("%s:%s", host, port)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Println("Error starting TCP listener:", err)
+		os.Exit(1)
+	}
+
+	log.Println("TCP listener started at port:", port)
+
+	// Create a new gRPC server
+	grpcServer := grpc.NewServer()
+
+	// Create the {{.ResourceName}} server
+	{{.ResourceNamePlural}}Server := controllers.New{{.ResourceName}}Server()
+
+	// Register the {{.ResourceName}} server with the gRPC server
+	pb.Register{{.ResourceName}}ServiceServer(grpcServer, {{.ResourceNamePlural}}Server)
+
+	// Enable reflection for the gRPC server
+	reflection.Register(grpcServer)
+
+	// Start serving gRPC requests
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Println("Error serving gRPC:", err)
+		os.Exit(1)
+	}
+	{{end}}
+
+	{{if .IsGRPCClient }}
+    client.Execute()
+    {{end}}	
+}
