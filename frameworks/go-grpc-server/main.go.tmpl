@@ -24,11 +24,6 @@ var (
 	host = "localhost"
 	port = "{{.gRPCServerPort}}"
 )
-{{else}}
-var (
-	host = "localhost:"
-	port =  "{{.gRPCServerPort}}"
-)
 {{end}}
 
 func main() {
