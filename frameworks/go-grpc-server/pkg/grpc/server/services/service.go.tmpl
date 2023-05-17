@@ -1,27 +1,27 @@
 package services
 
 import (
-	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 )
 
 type {{.ResourceName}}Service struct {}
 
 var {{.ResourceNameSingular}}Dao = daos.{{.ResourceName}}Dao{}
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Create{{.ResourceName}}({{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+func ({{.ResourceName}}Service *{{.ResourceName}}Service) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
 	return {{.ResourceNameSingular}}Dao.Create{{.ResourceName}}({{.ResourceNameSingular}})
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Get{{.ResourceName}}(id string) (*pb.{{.ResourceName}}, error) {
+func ({{.ResourceName}}Service *{{.ResourceName}}Service) Get{{.ResourceName}}(id string) (models.{{.ResourceName}}, error) {
 	return {{.ResourceNameSingular}}Dao.Get{{.ResourceName}}(id)
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) List{{.ResourceName}}s() ([]*pb.{{.ResourceName}}, error) {
+func ({{.ResourceName}}Service *{{.ResourceName}}Service) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
 	return {{.ResourceNameSingular}}Dao.List{{.ResourceName}}s()
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+func ({{.ResourceName}}Service *{{.ResourceName}}Service) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
 	return {{.ResourceNameSingular}}Dao.Update{{.ResourceName}}(id, {{.ResourceNameSingular}})
 }
 

@@ -1,24 +1,24 @@
 package daos
 
 import (
-	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-var {{.ResourceNamePlural}} []*pb.{{.ResourceName}}
+var {{.ResourceNamePlural}} []models.{{.ResourceName}}
 
 type {{.ResourceName}}Dao struct {}
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
 	{{.ResourceNamePlural}} = append({{.ResourceNamePlural}}, {{.ResourceNameSingular}})
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id string) (*pb.{{.ResourceName}}, error) {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id string) (models.{{.ResourceName}}, error) {
     if id == "" {
-		return nil, status.Error(codes.InvalidArgument, "id can't be empty")
+		return models.{{.ResourceName}}{}, status.Error(codes.InvalidArgument, "id can't be empty")
 	}
 
 	for _, {{.ResourceNameSingular}} := range {{.ResourceNamePlural}} {
@@ -27,10 +27,10 @@ func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(i
 		}
 	}
 
-	return nil, status.Error(codes.Internal,"something went wrong")
+	return models.{{.ResourceName}}{}, status.Error(codes.Internal,"something went wrong")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} *pb.{{.ResourceName}}) error {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
 	if id == "" {
 		return status.Error(codes.InvalidArgument, "id can't be empty")
 	}
@@ -57,6 +57,6 @@ func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}
 	return status.Error(codes.Internal, "something went wrong")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]*pb.{{.ResourceName}}, error) {
+func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
 	return {{.ResourceNamePlural}}, nil
 }

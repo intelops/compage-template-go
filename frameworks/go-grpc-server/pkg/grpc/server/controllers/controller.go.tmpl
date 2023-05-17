@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -13,7 +14,7 @@ import (
 
 var {{.ResourceNameSingular}}Service = services.{{.ResourceName}}Service{}
 
-type {{.ResourceName}}Server struct{
+type {{.ResourceName}}Server struct {
 	pb.Unimplemented{{.ResourceName}}ServiceServer
 }
 
@@ -21,35 +22,19 @@ func New{{.ResourceName}}Server() *{{.ResourceName}}Server {
 	return &{{.ResourceName}}Server{}
 }
 
-func (s *{{.ResourceName}}Server) Ping(ctx context.Context,req *pb.Request ) (*pb.Response, error) {
-
+func (s *{{.ResourceName}}Server) Ping(ctx context.Context, req *pb.Request) (*pb.Response, error) {
 	return &pb.Response{
-		Message:"Server is healthy and working!",
+		Message: "Server is healthy and working!",
 	}, nil
-
 }
 
-func (s *{{.ResourceName}}Server) Get{{.ResourceName}}(ctx context.Context,req *pb.Get{{.ResourceName}}Request ) (*pb.Get{{.ResourceName}}Response, error) {
-	id := req.GetId()
-	{{.ResourceNameSingular}},err := {{.ResourceNameSingular}}Service.Get{{.ResourceName}}(id)
-	
-	if err != nil{
-		return nil, err
-	}
-
-	return &pb.Get{{.ResourceName}}Response{
-		{{.ResourceName}}: {{.ResourceNameSingular}},
-	}, nil
-
-}
-
-func (s *{{.ResourceName}}Server) Create{{.ResourceName}}(ctx context.Context,req *pb.Create{{.ResourceName}}Request ) (*pb.Create{{.ResourceName}}Response, error)   {
+func (s *{{.ResourceName}}Server) Create{{.ResourceName}}(ctx context.Context, req *pb.Create{{.ResourceName}}Request) (*pb.Create{{.ResourceName}}Response, error) {
 	id := uuid.New().String()
 	request := req.Get{{.ResourceName}}()
 
-	{{.ResourceNameSingular}} := &pb.{{.ResourceName}}{
+	{{.ResourceNameSingular}} := models.{{.ResourceName}}{
 		Id: id,
-		{{ range .Fields }}{{ if eq .Name "Id" }}{{ .Name }}: id,{{ else }}{{ .Name }}: request.Get{{ .Name }}(),{{ end }}
+		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: request.Get{{ .Name }}(),{{ end }}
 		{{ end }}
 	}
 
@@ -62,32 +47,23 @@ func (s *{{.ResourceName}}Server) Create{{.ResourceName}}(ctx context.Context,re
 	}, nil
 }
 
-func (s *{{.ResourceName}}Server) Delete{{.ResourceName}}(ctx context.Context,req *pb.Delete{{.ResourceName}}Request ) (*pb.Delete{{.ResourceName}}Response, error) {
-	id := req.GetId()
 
-	err := {{.ResourceNameSingular}}Service.Delete{{.ResourceName}}(id)
+func (s *{{.ResourceName}}Server) Get{{.ResourceName}}(ctx context.Context, req *pb.Get{{.ResourceName}}Request) (*pb.Get{{.ResourceName}}Response, error) {
+	id := req.GetId()
+	{{.ResourceNameSingular}}, err := {{.ResourceNameSingular}}Service.Get{{.ResourceName}}(id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.Delete{{.ResourceName}}Response{
-		Message: "{{.ResourceName}} Deleted Successfully!",
-	}, nil
-}
-
-func (s *{{.ResourceName}}Server) Update{{.ResourceName}}(ctx context.Context,req *pb.Update{{.ResourceName}}Request ) (*pb.Update{{.ResourceName}}Response, error)  {
-	id := req.GetId()
-	new{{.ResourceNameSingular}} := req.Get{{.ResourceName}}()
-
-	err := {{.ResourceNameSingular}}Service.Update{{.ResourceName}}(id, new{{.ResourceNameSingular}})
-
-	if err != nil {
-		return nil, err
+	{{.ResourceNameSingular}}Response := &pb.{{.ResourceName}}{
+		Id: {{.ResourceNameSingular}}.Id,
+		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.ResourceNameSingular}}.{{.Name}},{{ end }}
+		{{ end }}
 	}
 
-	return &pb.Update{{.ResourceName}}Response{
-		Message: "{{.ResourceName}} Updated Successfully!",
+	return &pb.Get{{.ResourceName}}Response{
+		{{.ResourceName}}: {{.ResourceNameSingular}}Response,
 	}, nil
 }
 
@@ -98,7 +74,51 @@ func (s *{{.ResourceName}}Server) List{{.ResourceName}}s(ctx context.Context, re
 		return nil, err
 	}
 
+	var {{.ResourceNameSingular}}List []*pb.{{.ResourceName}}
+	for _, {{.ResourceNameSingular}} := range {{.ResourceNamePlural}} {
+		{{.ResourceNameSingular}}Response := &pb.{{.ResourceName}}{
+			Id: {{.ResourceNameSingular}}.Id,
+			{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.ResourceNameSingular}}.{{.Name}},{{ end }}
+			{{ end }}
+		}
+		{{.ResourceNameSingular}}List = append({{.ResourceNameSingular}}List, {{.ResourceNameSingular}}Response)
+	}
+
 	return &pb.List{{.ResourceName}}sResponse{
-		User: {{.ResourceNamePlural}},
+		{{.ResourceName}}: {{.ResourceNameSingular}}List,
+	}, nil
+}
+
+func (s *{{.ResourceName}}Server) Update{{.ResourceName}}(ctx context.Context, req *pb.Update{{.ResourceName}}Request) (*pb.Update{{.ResourceName}}Response, error) {
+	id := req.GetId()
+	{{.ResourceNameSingular}} := req.Get{{.ResourceName}}()
+
+	{{.ResourceNameSingular}}Response := models.{{.ResourceName}}{
+		Id: id,
+		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.ResourceNameSingular}}.Get{{.Name}},{{ end }}
+		{{ end }}
+	}
+	err := {{.ResourceNameSingular}}Service.Update{{.ResourceName}}(id, {{.ResourceNameSingular}}Response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Update{{.ResourceName}}Response{
+		Message: "{{.ResourceName}} Updated Successfully!",
+	}, nil
+}
+
+func (s *{{.ResourceName}}Server) Delete{{.ResourceName}}(ctx context.Context, req *pb.Delete{{.ResourceName}}Request) (*pb.Delete{{.ResourceName}}Response, error) {
+	id := req.GetId()
+
+	err := {{.ResourceNameSingular}}Service.Delete{{.ResourceName}}(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Delete{{.ResourceName}}Response{
+		Message: "{{.ResourceName}} Deleted Successfully!",
 	}, nil
 }

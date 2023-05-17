@@ -1,1 +1,8 @@
 package models
+
+type {{.ResourceName}} struct {
+    Id string
+    {{range $k, $v := .Fields}}
+    {{$k}} {{$v}}
+    {{end}}
+}
