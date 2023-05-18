@@ -1,0 +1,10 @@
+package models
+
+type {{.ResourceName}} struct {
+    Id string
+    {{range $k, $v := .Fields}}
+    {{if eq $k "Id"}}
+    {{else}}
+    {{$k}} {{$v}}
+    {{end}}
+}
