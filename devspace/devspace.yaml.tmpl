@@ -42,6 +42,7 @@ deployments:
         service:
           ports:
             - port: {{.RestServerPort}}
+            - port: {{.GrpcServerPort}}
 
 # This is a list of `dev` containers that are based on the containers created by your deployments
 dev:
@@ -69,6 +70,7 @@ dev:
     ports:
       - port: "2345:2345"
       - port: "{{.RestServerPort}}:{{.RestServerPort}}"
+      - port: "{{.GrpcServerPort}}:{{.GrpcServerPort}}"
     # Open the following URLs once they return an HTTP status code other than 502 or 503
     open:
       - url: http://localhost:{{.RestServerPort}}

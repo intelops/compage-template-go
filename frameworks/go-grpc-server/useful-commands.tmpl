@@ -1,4 +1,8 @@
-{{if .IsGRPCServer }}
+{{if .IsGrpcServer }}
+
+# Install grpcurl to access grpc services
+    go get github.com/fullstorydev/grpcurl/...
+    go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 
 # To check the services available
     grpcurl -plaintext localhost:50051 list

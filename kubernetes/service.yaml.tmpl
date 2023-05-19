@@ -10,6 +10,9 @@ spec:
     - protocol: TCP
       port: {{.RestServerPort}}
       targetPort: {{.RestServerPort}}
+    - protocol: TCP
+      port: {{.GrpcServerPort}}
+      targetPort: {{.GrpcServerPort}}
   selector:
     app: {{.NodeName}}
   type: ClusterIP

@@ -28,5 +28,11 @@ COPY --from=build /app/main /
 # Application port (optional)
 EXPOSE {{.RestServerPort}}
 {{end}}
+
+{{if .IsGrpcServer }}
+# Application port (optional)
+EXPOSE {{.GrpcServerPort}}
+{{end}}
+
 # Container start command for production
 CMD ["/main"]

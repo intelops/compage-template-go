@@ -40,14 +40,14 @@ func main() {
     v1 := router.Group("/v1")
     {
         {{range $i, $v := .Resources}}
-            v1.GET("/{{$v.ResourceNamePlural}}/:id", controllers.Get{{$v.ResourceName}})
-            v1.POST("/{{$v.ResourceNamePlural}}", controllers.Create{{$v.ResourceName}})
-            v1.PUT("/{{$v.ResourceNamePlural}}/:id", controllers.Update{{$v.ResourceName}})
-            v1.DELETE("/{{$v.ResourceNamePlural}}/:id", controllers.Delete{{$v.ResourceName}})
-            v1.GET("/{{$v.ResourceNamePlural}}", controllers.List{{$v.ResourceName}}s)
-            v1.PATCH("/{{$v.ResourceNamePlural}}/:id", controllers.Patch{{$v.ResourceName}})
-            v1.HEAD("/{{$v.ResourceNamePlural}}", controllers.Head{{$v.ResourceName}})
-            v1.OPTIONS("/{{$v.ResourceNamePlural}}", controllers.Options{{$v.ResourceName}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", controllers.Get{{$v.CapsResourceNameSingular}})
+            v1.POST("/{{$v.SmallResourceNamePlural}}", controllers.Create{{$v.CapsResourceNameSingular}})
+            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", controllers.Update{{$v.CapsResourceNameSingular}})
+            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", controllers.Delete{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}", controllers.List{{$v.CapsResourceNamePlural}})
+            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", controllers.Patch{{$v.CapsResourceNameSingular}})
+            v1.HEAD("/{{$v.SmallResourceNamePlural}}", controllers.Head{{$v.CapsResourceNameSingular}})
+            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", controllers.Options{{$v.CapsResourceNameSingular}})
         {{end}}
     }
 

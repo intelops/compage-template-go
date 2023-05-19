@@ -37,7 +37,7 @@ func NewMySQLClient(db *sql.DB) *MySQLClient {
 
 func (r *MySQLClient) Migrate() error {
 	query := `
-	CREATE TABLE IF NOT EXISTS {{.ResourceNamePlural}}(
+	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
 		ID int NOT NULL AUTO_INCREMENT,
         {{range $k, $v := .CreateQueryColumns}}
         {{$k}} {{$v}} NOT NULL,
@@ -50,8 +50,8 @@ func (r *MySQLClient) Migrate() error {
 	return err
 }
 
-func (r *MySQLClient) Create(m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
-	insertQuery := "INSERT INTO {{.ResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
+func (r *MySQLClient) Create(m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
 	res, err := r.db.Exec(insertQuery, {{.InsertQueryExecColumns}})
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
@@ -72,8 +72,8 @@ func (r *MySQLClient) Create(m models.{{.ResourceName}}) (*models.{{.ResourceNam
 	return &m, nil
 }
 
-func (r *MySQLClient) All() ([]models.{{.ResourceName}}, error) {
-	selectQuery := "SELECT * FROM {{.ResourceNamePlural}}"
+func (r *MySQLClient) All() ([]models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
 	rows, err := r.db.Query(selectQuery)
 	if err != nil {
 		return nil, err
@@ -82,9 +82,9 @@ func (r *MySQLClient) All() ([]models.{{.ResourceName}}, error) {
 		_ = rows.Close()
 	}(rows)
 
-	var all []models.{{.ResourceName}}
+	var all []models.{{.CapsResourceNameSingular}}
 	for rows.Next() {
-		var m models.{{.ResourceName}}
+		var m models.{{.CapsResourceNameSingular}}
 		if err := rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
 			return nil, err
 		}
@@ -93,11 +93,11 @@ func (r *MySQLClient) All() ([]models.{{.ResourceName}}, error) {
 	return all, nil
 }
 
-func (r *MySQLClient) Update(id int64, m models.{{.ResourceName}}) (*models.{{.ResourceName}}, error) {
+func (r *MySQLClient) Update(id int64, m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id == 0 {
 		return nil, errors.New("invalid updated ID")
 	}
-	updateQuery := "UPDATE {{.ResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
+	updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
 	res, err := r.db.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (r *MySQLClient) Update(id int64, m models.{{.ResourceName}}) (*models.{{.R
 }
 
 func (r *MySQLClient) Delete(id int64) error {
-	deleteQuery := "DELETE FROM {{.ResourceNamePlural}} WHERE Id = ?"
+	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
 	res, err := r.db.Exec(deleteQuery, id)
 	if err != nil {
 		return err
@@ -134,11 +134,11 @@ func (r *MySQLClient) Delete(id int64) error {
 	return err
 }
 
-func (r *MySQLClient) Get(id int64) (*models.{{.ResourceName}}, error) {
-	selectQuery := "SELECT * FROM {{.ResourceNamePlural}} WHERE Id = ?"
+func (r *MySQLClient) Get(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
 	row := r.db.QueryRow(selectQuery, id)
 
-	var m models.{{.ResourceName}}
+	var m models.{{.CapsResourceNameSingular}}
 	if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotExists

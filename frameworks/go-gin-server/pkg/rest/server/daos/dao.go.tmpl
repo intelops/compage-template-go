@@ -5,48 +5,48 @@ import (
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
 )
 
-var {{.ResourceNamePlural}} = make(map[int64]models.{{.ResourceName}})
+var {{.SmallResourceNamePlural}} = make(map[int64]models.{{.CapsResourceNameSingular}})
 
-type {{.ResourceName}}Dao struct {
+type {{.CapsResourceNameSingular}}Dao struct {
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
 
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id int64, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
+func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.ResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
 	if id != {{.ResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-	{{.ResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
 
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}}(id int64) error {
-	if _, ok := {{.ResourceNamePlural}}[id]; ok {
-		delete({{.ResourceNamePlural}}, id)
+func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
+		delete({{.SmallResourceNamePlural}}, id)
 		return nil
 	}
 
 	return errors.New("{{.ResourceNameSingular}} not found")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
-	v := make([]models.{{.ResourceName}}, len({{.ResourceNamePlural}}))
-	for _, value := range {{.ResourceNamePlural}} {
+func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+	v := make([]models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
+	for _, value := range {{.SmallResourceNamePlural}} {
 		v = append(v, value)
 	}
 
 	return v, nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id int64) (models.{{.ResourceName}}, error) {
-	if {{.ResourceNameSingular}}, ok := {{.ResourceNamePlural}}[id]; ok {
+func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	if {{.ResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		return {{.ResourceNameSingular}}, nil
 	}
 
-	return models.{{.ResourceName}}{}, errors.New("{{.ResourceNameSingular}} not found")
+	return models.{{.CapsResourceNameSingular}}{}, errors.New("{{.ResourceNameSingular}} not found")
 }

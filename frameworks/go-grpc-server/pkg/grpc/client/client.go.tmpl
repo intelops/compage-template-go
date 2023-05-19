@@ -11,7 +11,7 @@ import (
 
 var (
 	host = "localhost:"
-	port =  {{.GRPCServerPort}}
+	port =  {{.GrpcServerPort}}
 )
 
 func Execute(){
@@ -23,9 +23,9 @@ func Execute(){
 		log.Fatalln(err)
 	}
 
-    {{.ResourceNameSingular}}Client := pb.New{{.ResourceName}}ServiceClient(conn)
+    {{.SmallResourceNameSingular}}Client := pb.New{{.CapsResourceNameSingular}}ServiceClient(conn)
 
-    ping, err := {{.ResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
+    ping, err := {{.SmallResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
 
     if err != nil {
 		log.Fatalln(err)

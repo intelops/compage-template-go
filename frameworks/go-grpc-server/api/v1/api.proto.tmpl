@@ -3,59 +3,59 @@ syntax = "proto3";
 package pb;
 option go_package="./api/v1;pb";
 
-service {{ .ResourceName }}Service {
+service {{ .CapsResourceNameSingular }}Service {
     rpc Ping (Request) returns (Response) {};
-    rpc Create{{ .ResourceName }} (Create{{ .ResourceName }}Request) returns (Create{{ .ResourceName }}Response) {};
-    rpc Get{{ .ResourceName }} (Get{{ .ResourceName }}Request) returns (Get{{ .ResourceName }}Response) {};
-    rpc Update{{ .ResourceName }} (Update{{ .ResourceName }}Request) returns (Update{{ .ResourceName }}Response) {};
-    rpc Delete{{ .ResourceName }} (Delete{{ .ResourceName }}Request) returns (Delete{{ .ResourceName }}Response) {};
-    rpc List{{ .ResourceName }}s (List{{ .ResourceName }}sRequest) returns (List{{ .ResourceName }}sResponse) {};
+    rpc Create{{ .CapsResourceNameSingular }} (Create{{ .CapsResourceNameSingular }}Request) returns (Create{{ .CapsResourceNameSingular }}Response) {};
+    rpc Get{{ .CapsResourceNameSingular }} (Get{{ .CapsResourceNameSingular }}Request) returns (Get{{ .CapsResourceNameSingular }}Response) {};
+    rpc Update{{ .CapsResourceNameSingular }} (Update{{ .CapsResourceNameSingular }}Request) returns (Update{{ .CapsResourceNameSingular }}Response) {};
+    rpc Delete{{ .CapsResourceNameSingular }} (Delete{{ .CapsResourceNameSingular }}Request) returns (Delete{{ .CapsResourceNameSingular }}Response) {};
+    rpc List{{ .CapsResourceNameSingular }}s (List{{ .CapsResourceNameSingular }}sRequest) returns (List{{ .CapsResourceNameSingular }}sResponse) {};
 }
 
-message {{.ResourceName}} {
+message {{.CapsResourceNameSingular}} {
     string id = 1;{{range $key, $value := .Fields}}
     {{$value}} {{$key}} = {{counter}};{{end}}
 }
 
-message Create{{ .ResourceName }}Request {
-    {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+message Create{{ .CapsResourceNameSingular }}Request {
+    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 1;
 }
 
-message Create{{ .ResourceName }}Response {
+message Create{{ .CapsResourceNameSingular }}Response {
     string message = 1;
 }
 
-message Get{{ .ResourceName }}Request {
+message Get{{ .CapsResourceNameSingular }}Request {
     string id = 1;
 }
 
-message Get{{ .ResourceName }}Response {
-    {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+message Get{{ .CapsResourceNameSingular }}Response {
+    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 1;
 }
 
-message Update{{ .ResourceName }}Request {
+message Update{{ .CapsResourceNameSingular }}Request {
     string id = 1;
-    {{.ResourceName}} {{.ResourceNameSingular}} = 2;
+    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 2;
 }
 
-message Update{{ .ResourceName }}Response {
+message Update{{ .CapsResourceNameSingular }}Response {
     string message = 1;
 }
 
-message Delete{{ .ResourceName }}Request {
+message Delete{{ .CapsResourceNameSingular }}Request {
     string id = 1;
 }
 
-message Delete{{ .ResourceName }}Response {
+message Delete{{ .CapsResourceNameSingular }}Response {
     string message = 1;
 }
 
-message List{{ .ResourceName }}sRequest {
+message List{{ .CapsResourceNameSingular }}sRequest {
 
 }
 
-message List{{ .ResourceName }}sResponse {
-    repeated {{.ResourceName}} {{.ResourceNameSingular}} = 1;
+message List{{ .CapsResourceNameSingular }}sResponse {
+    repeated {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 1;
 }
 
 message Request {}
