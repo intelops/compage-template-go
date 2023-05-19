@@ -1,0 +1,168 @@
+package sql_client
+
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"github.com/go-sql-driver/mysql"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+	"os"
+	"time"
+)
+
+var (
+	ErrDuplicate    = errors.New("record already exists")
+	ErrNotExists    = errors.New("row not exists")
+	ErrUpdateFailed = errors.New("update failed")
+	ErrDeleteFailed = errors.New("delete failed")
+)
+
+var (
+	user     = os.Getenv("MYSQL_DB_USER")
+	password = os.Getenv("MYSQL_DB_PASSWORD")
+	host     = os.Getenv("MYSQL_DB_HOST")
+	port     = os.Getenv("MYSQL_DB_PORT")
+	database = os.Getenv("MYSQL_DB_DATABASE")
+)
+
+type MySQLClient struct {
+	db *sql.DB
+}
+
+func NewMySQLClient(db *sql.DB) *MySQLClient {
+	return &MySQLClient{
+		db: db,
+	}
+}
+
+func (r *MySQLClient) Migrate() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
+		ID int NOT NULL AUTO_INCREMENT,
+        {{range $k, $v := .CreateQueryColumns}}
+        {{$k}} {{$v}} NOT NULL,
+        {{end}}
+	    PRIMARY KEY (ID)
+	);
+	`
+
+	_, err := r.db.Exec(query)
+	return err
+}
+
+func (r *MySQLClient) Create(m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
+	res, err := r.db.Exec(insertQuery, {{.InsertQueryExecColumns}})
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) {
+			if mysqlErr.Number == 1062 {
+				return nil, ErrDuplicate
+			}
+		}
+		return nil, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	m.Id = id
+
+	return &m, nil
+}
+
+func (r *MySQLClient) All() ([]models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
+	rows, err := r.db.Query(selectQuery)
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
+
+	var all []models.{{.CapsResourceNameSingular}}
+	for rows.Next() {
+		var m models.{{.CapsResourceNameSingular}}
+		if err := rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+			return nil, err
+		}
+		all = append(all, m)
+	}
+	return all, nil
+}
+
+func (r *MySQLClient) Update(id int64, m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+	if id == 0 {
+		return nil, errors.New("invalid updated ID")
+	}
+	updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
+	res, err := r.db.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	if rowsAffected == 0 {
+		return nil, ErrUpdateFailed
+	}
+
+	return &m, nil
+}
+
+func (r *MySQLClient) Delete(id int64) error {
+	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+	res, err := r.db.Exec(deleteQuery, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrDeleteFailed
+	}
+
+	return err
+}
+
+func (r *MySQLClient) Get(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+	row := r.db.QueryRow(selectQuery, id)
+
+	var m models.{{.CapsResourceNameSingular}}
+	if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotExists
+		}
+		return nil, err
+	}
+	return &m, nil
+}
+
+func InitMySQLDB() (*MySQLClient, error) {
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database)
+	db, err := sql.Open("mysql", dataSource)
+	if err != nil {
+		panic(err)
+	}
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+	mySQLClient := NewMySQLClient(db)
+
+	if err = mySQLClient.Migrate(); err != nil {
+		return nil, err
+	}
+
+	return mySQLClient, nil
+}

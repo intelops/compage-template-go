@@ -1,0 +1,70 @@
+package daos
+
+import (
+	"errors"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sql"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+    log "github.com/sirupsen/logrus"
+)
+
+type {{.CapsResourceNameSingular}}Dao struct {
+	sql_client *sql_client.MySQLClient
+}
+
+func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
+	dbRepository, err := sql_client.InitMySQLDB()
+	if err != nil {
+		return nil, err
+	}
+	return &{{.CapsResourceNameSingular}}Dao{
+		dbRepository,
+	}, nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	_, err := {{.SmallResourceNameSingular}}Dao.sql_client.Create({{.SmallResourceNameSingular}})
+	if err != nil {
+		return err
+	}
+	log.Debugf("{{.SmallResourceNameSingular}} created")
+	return nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	if id != {{.SmallResourceNameSingular}}.Id {
+		return errors.New("id and payload don't match")
+	}
+    _, err := {{.SmallResourceNameSingular}}Dao.sql_client.Update(id, {{.SmallResourceNameSingular}})
+	if err != nil {
+		return err
+	}
+	log.Debugf("{{.SmallResourceNameSingular}} updated")
+	return nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+    err := {{.SmallResourceNameSingular}}Dao.sql_client.Delete(id)
+	if err != nil {
+		return err
+	}
+	log.Debugf("{{.SmallResourceNameSingular}} deleted")
+	return nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+    {{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Dao.sql_client.All()
+	if err != nil {
+		return {{.SmallResourceNamePlural}}, err
+	}
+	log.Debugf("{{.SmallResourceNameSingular}} listed")
+	return {{.SmallResourceNamePlural}}, nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	{{.ResourceNameSingular}}, err := {{.ResourceNameSingular}}Dao.sql_client.Get(id)
+	if err != nil {
+		return models.{{.CapsResourceNameSingular}}{}, err
+	}
+	log.Debugf("{{.ResourceNameSingular}} retrieved")
+	return *{{.ResourceNameSingular}}, nil
+}

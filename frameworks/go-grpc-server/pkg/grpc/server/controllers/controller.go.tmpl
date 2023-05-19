@@ -6,7 +6,7 @@ import (
 	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
-
+    "strconv"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -83,7 +83,7 @@ func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(ct
 	for _, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
 		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
 			Id: {{.SmallResourceNameSingular}}.Id,
-			{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.SmallResourceNameSingular}}.{{.Name}},{{ end }}
+			{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{.Name}}: {{$.SmallResourceNameSingular}}.{{.Name}},{{ end }}
 			{{ end }}
 		}
 		{{.SmallResourceNameSingular}}List = append({{.ResourceNameSingular}}List, {{.ResourceNameSingular}}Response)
