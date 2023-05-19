@@ -41,8 +41,12 @@ deployments:
           - image: my-image-registry.tld/username/app
         service:
           ports:
+        {{if .IsRestServer }}
             - port: {{.RestServerPort}}
+        {{end}}
+        {{if .IsGrpcServer }}
             - port: {{.GrpcServerPort}}
+        {{end}}
 
 # This is a list of `dev` containers that are based on the containers created by your deployments
 dev:
@@ -69,8 +73,12 @@ dev:
     # Forward the following ports to be able access your application via localhost
     ports:
       - port: "2345:2345"
+    {{if .IsRestServer }}
       - port: "{{.RestServerPort}}:{{.RestServerPort}}"
+    {{end}}
+    {{if .IsGrpcServer }}
       - port: "{{.GrpcServerPort}}:{{.GrpcServerPort}}"
+    {{end}}
     # Open the following URLs once they return an HTTP status code other than 502 or 503
     open:
       - url: http://localhost:{{.RestServerPort}}
