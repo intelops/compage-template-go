@@ -79,10 +79,11 @@ dev:
     {{if .IsGrpcServer }}
       - port: "{{.GrpcServerPort}}:{{.GrpcServerPort}}"
     {{end}}
+{{if .IsRestServer }}
     # Open the following URLs once they return an HTTP status code other than 502 or 503
     open:
       - url: http://localhost:{{.RestServerPort}}
-
+{{end}}
 # Use the `commands` section to define repeatable dev workflows for this project
 commands:
   migrate-db:
