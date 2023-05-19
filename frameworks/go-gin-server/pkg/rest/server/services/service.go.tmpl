@@ -30,13 +30,13 @@ func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Servic
 }
 
 func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Delete{{.CapsResourceNameSingular}}(id int64) error {
-	return {{.SmallResourceNameSingular}}Service.{{.ResourceNameSingular}}Dao.Delete{{.CapsResourceNameSingular}}(id)
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Delete{{.CapsResourceNameSingular}}(id)
 }
 
-func ({{.ResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
-	return {{.ResourceNameSingular}}Service.{{.ResourceNameSingular}}Dao.List{{.CapsResourceNamePlural}}()
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.List{{.CapsResourceNamePlural}}()
 }
 
-func ({{.ResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-	return {{.ResourceNameSingular}}Service.{{.ResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
 }

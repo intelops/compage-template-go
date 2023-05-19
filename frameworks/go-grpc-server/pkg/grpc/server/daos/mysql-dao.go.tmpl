@@ -61,10 +61,10 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-	{{.ResourceNameSingular}}, err := {{.ResourceNameSingular}}Dao.sql_client.Get(id)
+	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.sql_client.Get(id)
 	if err != nil {
 		return models.{{.CapsResourceNameSingular}}{}, err
 	}
-	log.Debugf("{{.ResourceNameSingular}} retrieved")
-	return *{{.ResourceNameSingular}}, nil
+	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+	return *{{.SmallResourceNameSingular}}, nil
 }

@@ -16,25 +16,25 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.ResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	if id != {{.ResourceNameSingular}}.Id {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	if id != {{.SmallResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-	{{.SmallResourceNamePlural}}[{{.ResourceNameSingular}}.Id] = {{.ResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
 
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
 	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		delete({{.SmallResourceNamePlural}}, id)
 		return nil
 	}
 
-	return errors.New("{{.ResourceNameSingular}} not found")
+	return errors.New("{{.SmallResourceNameSingular}} not found")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
 	v := make([]models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
 	for _, value := range {{.SmallResourceNamePlural}} {
 		v = append(v, value)
@@ -43,10 +43,10 @@ func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.Cap
 	return v, nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-	if {{.ResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
-		return {{.ResourceNameSingular}}, nil
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	if {{.SmallResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
+		return {{.SmallResourceNameSingular}}, nil
 	}
 
-	return models.{{.CapsResourceNameSingular}}{}, errors.New("{{.ResourceNameSingular}} not found")
+	return models.{{.CapsResourceNameSingular}}{}, errors.New("{{.SmallResourceNameSingular}} not found")
 }

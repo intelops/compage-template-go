@@ -18,7 +18,7 @@ message {{.CapsResourceNameSingular}} {
 }
 
 message Create{{.CapsResourceNameSingular}}Request {
-    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 1;
+    {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 1;
 }
 
 message Create{{.CapsResourceNameSingular}}Response {
@@ -30,12 +30,12 @@ message Get{{.CapsResourceNameSingular}}Request {
 }
 
 message Get{{.CapsResourceNameSingular}}Response {
-    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 1;
+    {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 1;
 }
 
 message Update{{.CapsResourceNameSingular}}Request {
     string id = 1;
-    {{.CapsResourceNameSingular}} {{.ResourceNameSingular}} = 2;
+    {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 2;
 }
 
 message Update{{.CapsResourceNameSingular}}Response {

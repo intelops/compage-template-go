@@ -86,11 +86,11 @@ func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(ct
 			{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{.Name}}: {{$.SmallResourceNameSingular}}.{{.Name}},{{ end }}
 			{{ end }}
 		}
-		{{.SmallResourceNameSingular}}List = append({{.ResourceNameSingular}}List, {{.ResourceNameSingular}}Response)
+		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}}Response)
 	}
 
 	return &pb.List{{.CapsResourceNamePlural}}Response{
-		{{.CapsResourceNameSingular}}: {{.ResourceNameSingular}}List,
+		{{.CapsResourceNameSingular}}: {{.SmallResourceNameSingular}}List,
 	}, nil
 }
 
@@ -101,14 +101,14 @@ func (s *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}
         return nil, err
     }
 
-	{{.ResourceNameSingular}} := req.Get{{.CapsResourceNameSingular}}()
+	{{.SmallResourceNameSingular}} := req.Get{{.CapsResourceNameSingular}}()
 
-	{{.ResourceNameSingular}}Response := models.{{.CapsResourceNameSingular}}{
+	{{.SmallResourceNameSingular}}Response := models.{{.CapsResourceNameSingular}}{
 		Id: id,
-		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.ResourceNameSingular}}.Get{{.Name}},{{ end }}
+		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.SmallResourceNameSingular}}.Get{{.Name}},{{ end }}
 		{{ end }}
 	}
-	err := {{.ResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, {{.ResourceNameSingular}}Response)
+	err := {{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}}Response)
 
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (s *{{.CapsResourceNameSingular}}Server) Delete{{.CapsResourceNameSingular}
         return nil, err
     }
 
-	err := {{.ResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id)
+	err := {{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id)
 
 	if err != nil {
 		return nil, err

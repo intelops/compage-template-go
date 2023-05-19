@@ -21,35 +21,35 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 		return models.{{.CapsResourceNameSingular}}{}, status.Error(codes.InvalidArgument, "id can't be empty")
 	}
 
-	for _, {{.ResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
-		if {{.ResourceNameSingular}}.Id == id {
-			return {{.ResourceNameSingular}}, nil
+	for _, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
+		if {{.SmallResourceNameSingular}}.Id == id {
+			return {{.SmallResourceNameSingular}}, nil
 		}
 	}
 
 	return models.{{.CapsResourceNameSingular}}{}, status.Error(codes.Internal,"something went wrong")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.ResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
 	if id == "" {
 		return status.Error(codes.InvalidArgument, "id can't be empty")
 	}
 
 	for idx, value := range {{.SmallResourceNamePlural}} {
 		if value.Id == id {
-			{{.SmallResourceNamePlural}}[idx] = {{.ResourceNameSingular}}
+			{{.SmallResourceNamePlural}}[idx] = {{.SmallResourceNameSingular}}
 			return nil
 		}
 	}
 	return status.Error(codes.Internal, "something went wrong")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
 	if id == "" {
 		return status.Error(codes.InvalidArgument, "id can't be empty")
 	}
-	for idx, {{.ResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
-		if {{.ResourceNameSingular}}.Id == id {
+	for idx, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
+		if {{.SmallResourceNameSingular}}.Id == id {
 			{{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}[:idx], {{.SmallResourceNamePlural}}[idx+1:]...)
 			return nil
 		}
@@ -57,6 +57,6 @@ func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.C
 	return status.Error(codes.Internal, "something went wrong")
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
 	return {{.SmallResourceNamePlural}}, nil
 }
