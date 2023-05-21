@@ -2,7 +2,7 @@ module github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
 
 go 1.20
 
-{{if .IsGRPCServer }}
+{{if .IsGrpcServer }}
 require (
 	github.com/golang/protobuf v1.5.3
 	google.golang.org/grpc v1.54.0

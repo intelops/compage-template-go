@@ -7,9 +7,16 @@ metadata:
   name: {{.NodeName}}
 spec:
   ports:
+  {{if .IsRestServer }}
     - protocol: TCP
       port: {{.RestServerPort}}
       targetPort: {{.RestServerPort}}
+   {{end}}
+   {{if .IsGrpcServer }}
+    - protocol: TCP
+      port: {{.GrpcServerPort}}
+      targetPort: {{.GrpcServerPort}}
+   {{end}}
   selector:
     app: {{.NodeName}}
   type: ClusterIP

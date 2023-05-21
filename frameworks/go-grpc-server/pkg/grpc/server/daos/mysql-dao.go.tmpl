@@ -2,17 +2,17 @@ package daos
 
 import (
 	"errors"
-    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sql"
-	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos/clients/sql"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
     log "github.com/sirupsen/logrus"
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
-	sqlClient *sql_client.SQLiteClient
+	sqlClient *sql_client.MySQLClient
 }
 
 func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
-	dbRepository, err := sql_client.InitSqliteDB()
+	dbRepository, err := sql_client.InitMySQLDB()
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +31,10 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-    if id != {{.SmallResourceNameSingular}}.Id {
+	if id != {{.SmallResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-	_, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Update(id, {{.SmallResourceNameSingular}})
+    _, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Update(id, {{.SmallResourceNameSingular}})
 	if err != nil {
 		return err
 	}

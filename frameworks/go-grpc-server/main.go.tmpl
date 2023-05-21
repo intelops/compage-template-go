@@ -1,7 +1,7 @@
 package main
 
 import (
-	{{if .IsGRPCServer }}
+	{{if .IsGrpcServer }}
 	"fmt"
 	"log"
 	"net"
@@ -19,15 +19,15 @@ import (
 	{{end}}
 )
 
-{{if .IsGRPCServer }}
+{{if .IsGrpcServer }}
 var (
 	host = "localhost"
-	port = "{{.GRPCServerPort}}"
+	port = "{{.GrpcServerPort}}"
 )
 {{end}}
 
 func main() {
-	{{if .IsGRPCServer }}
+	{{if .IsGrpcServer }}
 	// Set up the TCP listener
 	addr := fmt.Sprintf("%s:%s", host, port)
 	lis, err := net.Listen("tcp", addr)
@@ -41,11 +41,11 @@ func main() {
 	// Create a new gRPC server
 	grpcServer := grpc.NewServer()
 
-	// Create the {{.ResourceName}} server
-	{{.ResourceNamePlural}}Server := controllers.New{{.ResourceName}}Server()
+	// Create the {{.CapsResourceNameSingular}} server
+	{{.SmallResourceNamePlural}}Server := controllers.New{{.CapsResourceNameSingular}}Server()
 
-	// Register the {{.ResourceName}} server with the gRPC server
-	pb.Register{{.ResourceName}}ServiceServer(grpcServer, {{.ResourceNamePlural}}Server)
+	// Register the {{.CapsResourceNameSingular}} server with the gRPC server
+	pb.Register{{.CapsResourceNameSingular}}ServiceServer(grpcServer, {{.SmallResourceNamePlural}}Server)
 
 	// Enable reflection for the gRPC server
 	reflection.Register(grpcServer)
@@ -57,7 +57,7 @@ func main() {
 	}
 	{{end}}
 
-	{{if .IsGRPCClient }}
+	{{if .IsGrpcClient }}
     client.Execute()
     {{end}}	
 }

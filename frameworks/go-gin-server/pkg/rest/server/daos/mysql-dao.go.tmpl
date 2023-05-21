@@ -7,64 +7,64 @@ import (
     log "github.com/sirupsen/logrus"
 )
 
-type {{.ResourceName}}Dao struct {
-	sql_client *sql_client.MySQLClient
+type {{.CapsResourceNameSingular}}Dao struct {
+	sqlClient *sql_client.MySQLClient
 }
 
-func New{{.ResourceName}}Dao() (*{{.ResourceName}}Dao, error) {
+func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
 	dbRepository, err := sql_client.InitMySQLDB()
 	if err != nil {
 		return nil, err
 	}
-	return &{{.ResourceName}}Dao{
+	return &{{.CapsResourceNameSingular}}Dao{
 		dbRepository,
 	}, nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	_, err := {{.ResourceNameSingular}}Dao.sql_client.Create({{.ResourceNameSingular}})
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	_, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Create({{.SmallResourceNameSingular}})
 	if err != nil {
 		return err
 	}
-	log.Debugf("{{.ResourceNameSingular}} created")
+	log.Debugf("{{.SmallResourceNameSingular}} created")
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Update{{.ResourceName}}(id int64, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	if id != {{.ResourceNameSingular}}.Id {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	if id != {{.SmallResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-    _, err := {{.ResourceNameSingular}}Dao.sql_client.Update(id, {{.ResourceNameSingular}})
+    _, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Update(id, {{.SmallResourceNameSingular}})
 	if err != nil {
 		return err
 	}
-	log.Debugf("{{.ResourceNameSingular}} updated")
+	log.Debugf("{{.SmallResourceNameSingular}} updated")
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Delete{{.ResourceName}}(id int64) error {
-    err := {{.ResourceNameSingular}}Dao.sql_client.Delete(id)
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+    err := {{.SmallResourceNameSingular}}Dao.sqlClient.Delete(id)
 	if err != nil {
 		return err
 	}
-	log.Debugf("{{.ResourceNameSingular}} deleted")
+	log.Debugf("{{.SmallResourceNameSingular}} deleted")
 	return nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
-    {{.ResourceNamePlural}}, err := {{.ResourceNameSingular}}Dao.sql_client.All()
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+    {{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Dao.sqlClient.All()
 	if err != nil {
-		return {{.ResourceNamePlural}}, err
+		return {{.SmallResourceNamePlural}}, err
 	}
-	log.Debugf("{{.ResourceNameSingular}} listed")
-	return {{.ResourceNamePlural}}, nil
+	log.Debugf("{{.SmallResourceNameSingular}} listed")
+	return {{.SmallResourceNamePlural}}, nil
 }
 
-func ({{.ResourceNameSingular}}Dao *{{.ResourceName}}Dao) Get{{.ResourceName}}(id int64) (models.{{.ResourceName}}, error) {
-	{{.ResourceNameSingular}}, err := {{.ResourceNameSingular}}Dao.sql_client.Get(id)
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Get(id)
 	if err != nil {
-		return models.{{.ResourceName}}{}, err
+		return models.{{.CapsResourceNameSingular}}{}, err
 	}
-	log.Debugf("{{.ResourceNameSingular}} retrieved")
-	return *{{.ResourceNameSingular}}, nil
+	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+	return *{{.SmallResourceNameSingular}}, nil
 }

@@ -3,28 +3,40 @@ package services
 import (
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
+    log "github.com/sirupsen/logrus"
 )
 
-type {{.ResourceName}}Service struct {}
-
-var {{.ResourceNameSingular}}Dao = daos.{{.ResourceName}}Dao{}
-
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Create{{.ResourceName}}({{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	return {{.ResourceNameSingular}}Dao.Create{{.ResourceName}}({{.ResourceNameSingular}})
+type {{.CapsResourceNameSingular}}Service struct {
+	{{.SmallResourceNameSingular}}Dao *daos.{{.CapsResourceNameSingular}}Dao
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Get{{.ResourceName}}(id string) (models.{{.ResourceName}}, error) {
-	return {{.ResourceNameSingular}}Dao.Get{{.ResourceName}}(id)
+func New{{.CapsResourceNameSingular}}Service() *{{.CapsResourceNameSingular}}Service {
+	{{.SmallResourceNameSingular}}Dao, err := daos.New{{.CapsResourceNameSingular}}Dao()
+	if err != nil {
+		log.Fatal(err)
+		return nil
+	}
+	return &{{.CapsResourceNameSingular}}Service{
+		{{.SmallResourceNameSingular}}Dao: {{.SmallResourceNameSingular}}Dao,
+	}
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) List{{.ResourceName}}s() ([]models.{{.ResourceName}}, error) {
-	return {{.ResourceNameSingular}}Dao.List{{.ResourceName}}s()
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}})
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Update{{.ResourceName}}(id string, {{.ResourceNameSingular}} models.{{.ResourceName}}) error {
-	return {{.ResourceNameSingular}}Dao.Update{{.ResourceName}}(id, {{.ResourceNameSingular}})
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
 }
 
-func ({{.ResourceName}}Service *{{.ResourceName}}Service) Delete{{.ResourceName}}(id string) error {
-	return {{.ResourceNameSingular}}Dao.Delete{{.ResourceName}}(id)
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.List{{.CapsResourceNamePlural}}()
+}
+
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}})
+}
+
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Delete{{.CapsResourceNameSingular}}(id int64) error {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Delete{{.CapsResourceNameSingular}}(id)
 }

@@ -9,26 +9,22 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var (
-	host = "localhost:"
-	port =  {{.GRPCServerPort}}
-)
 
 func Execute(){
-    url := host + port
+    url := {{.GrpcClientServiceName}}:{{.GrpcClientPort}}
 
     conn, err := grpc.Dial(url ,grpc.WithTransportCredentials(insecure.NewCredentials()))
 
     if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
-    {{.ResourceNameSingular}}Client := pb.New{{.ResourceName}}ServiceClient(conn)
+    {{.SmallResourceNameSingular}}Client := pb.New{{.CapsResourceNameSingular}}ServiceClient(conn)
 
-    ping, err := {{.ResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
+    ping, err := {{.SmallResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
 
     if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
     log.Println(ping)
