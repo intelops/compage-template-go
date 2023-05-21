@@ -13,8 +13,10 @@ service {{ .CapsResourceNameSingular }}Service {
 }
 
 message {{.CapsResourceNameSingular}} {
-    string id = 1;{{range $key, $value := .Fields}}
-    {{$value}} {{$key}} = {{counter}};{{end}}
+    int64 id = 1;
+    {{range $index, $value := .FieldNames}}
+    {{index $.Fields $value}} {{$value}} = {{incCount $index}};
+    {{end}}
 }
 
 message Create{{.CapsResourceNameSingular}}Request {
@@ -26,7 +28,7 @@ message Create{{.CapsResourceNameSingular}}Response {
 }
 
 message Get{{.CapsResourceNameSingular}}Request {
-    string id = 1;
+    int64 id = 1;
 }
 
 message Get{{.CapsResourceNameSingular}}Response {
@@ -34,7 +36,7 @@ message Get{{.CapsResourceNameSingular}}Response {
 }
 
 message Update{{.CapsResourceNameSingular}}Request {
-    string id = 1;
+    int64 id = 1;
     {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 2;
 }
 
@@ -43,7 +45,7 @@ message Update{{.CapsResourceNameSingular}}Response {
 }
 
 message Delete{{.CapsResourceNameSingular}}Request {
-    string id = 1;
+    int64 id = 1;
 }
 
 message Delete{{.CapsResourceNameSingular}}Response {

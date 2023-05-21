@@ -46,7 +46,7 @@ func Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 		return
 	}
 
-	// trigger {{.SmallResourceNameSingular}} updation
+	// trigger {{.SmallResourceNameSingular}} update
 	if err := {{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

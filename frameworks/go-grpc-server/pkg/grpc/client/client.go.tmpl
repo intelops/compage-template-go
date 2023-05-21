@@ -16,7 +16,7 @@ func Execute(){
     conn, err := grpc.Dial(url ,grpc.WithTransportCredentials(insecure.NewCredentials()))
 
     if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
     {{.SmallResourceNameSingular}}Client := pb.New{{.CapsResourceNameSingular}}ServiceClient(conn)
@@ -24,7 +24,7 @@ func Execute(){
     ping, err := {{.SmallResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
 
     if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
     log.Println(ping)

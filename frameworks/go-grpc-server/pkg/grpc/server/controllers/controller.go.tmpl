@@ -6,13 +6,9 @@ import (
 	pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
-    "strconv"
-	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
-var {{.SmallResourceNameSingular}}Service = services.{{.CapsResourceNameSingular}}Service{}
+var {{.SmallResourceNameSingular}}Service = services.New{{.CapsResourceNameSingular}}Service()
 
 type {{.CapsResourceNameSingular}}Server struct {
 	pb.Unimplemented{{.CapsResourceNameSingular}}ServiceServer
@@ -22,20 +18,20 @@ func New{{.CapsResourceNameSingular}}Server() *{{.CapsResourceNameSingular}}Serv
 	return &{{.CapsResourceNameSingular}}Server{}
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) Ping(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+func (s *{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.Request) (*pb.Response, error) {
 	return &pb.Response{
 		Message: "Server is healthy and working!",
 	}, nil
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}}(ctx context.Context, req *pb.Create{{.CapsResourceNameSingular}}Request) (*pb.Create{{.CapsResourceNameSingular}}Response, error) {
-	id := uuid.New().String()
-	request := req.Get{{.CapsResourceNameSingular}}()
-
+func (s *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Create{{.CapsResourceNameSingular}}Request) (*pb.Create{{.CapsResourceNameSingular}}Response, error) {
 	{{.SmallResourceNameSingular}} := models.{{.CapsResourceNameSingular}}{
-		Id: id,
-		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: request.Get{{ .Name }}(),{{ end }}
-		{{ end }}
+        {{range $k, $v := .Fields}}
+            {{if eq $k "Id"}}
+            {{else}}
+                {{$k}}: req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
+            {{end}}
+        {{end}}
 	}
 
 	if err := {{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}}); err != nil {
@@ -48,23 +44,22 @@ func (s *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}
 }
 
 
-func (s *{{.CapsResourceNameSingular}}Server) Get{{.CapsResourceNameSingular}}(ctx context.Context, req *pb.Get{{.CapsResourceNameSingular}}Request) (*pb.Get{{.CapsResourceNameSingular}}Response, error) {
-    id, err := strconv.ParseInt(req.GetId(), 10, 64)
-    if err != nil {
-        log.Error(err)
-        return nil, err
-    }
-
-	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
+func (s *{{.CapsResourceNameSingular}}Server) Get{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Get{{.CapsResourceNameSingular}}Request) (*pb.Get{{.CapsResourceNameSingular}}Response, error) {
+    id := req.GetId()
+	retrieved{{.CapsResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
 
 	if err != nil {
 		return nil, err
 	}
 
 	{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
-		Id: {{.SmallResourceNameSingular}}.Id,
-		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.SmallResourceNameSingular}}.{{.Name}},{{ end }}
-		{{ end }}
+		Id: id,
+        {{range $k, $v := .Fields}}
+            {{if eq $k "Id"}}
+            {{else}}
+                {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
+            {{end}}
+        {{end}}
 	}
 
 	return &pb.Get{{.CapsResourceNameSingular}}Response{
@@ -72,7 +67,7 @@ func (s *{{.CapsResourceNameSingular}}Server) Get{{.CapsResourceNameSingular}}(c
 	}, nil
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(ctx context.Context, req *pb.List{{.CapsResourceNamePlural}}Request) (*pb.List{{.CapsResourceNamePlural}}Response, error) {
+func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(_ context.Context, _ *pb.List{{.CapsResourceNamePlural}}Request) (*pb.List{{.CapsResourceNamePlural}}Response, error) {
 	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
 
 	if err != nil {
@@ -80,11 +75,15 @@ func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(ct
 	}
 
 	var {{.SmallResourceNameSingular}}List []*pb.{{.CapsResourceNameSingular}}
-	for _, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
+	for _, retrieved{{.CapsResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
 		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
-			Id: {{.SmallResourceNameSingular}}.Id,
-			{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{.Name}}: {{$.SmallResourceNameSingular}}.{{.Name}},{{ end }}
-			{{ end }}
+			Id: retrieved{{.CapsResourceNameSingular}}.Id,
+            {{range $k, $v := .Fields}}
+                {{if eq $k "Id"}}
+                {{else}}
+                    {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
+                {{end}}
+            {{end}}
 		}
 		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}}Response)
 	}
@@ -94,21 +93,19 @@ func (s *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(ct
 	}, nil
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(ctx context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
-    id, err := strconv.ParseInt(req.GetId(), 10, 64)
-    if err != nil {
-        log.Error(err)
-        return nil, err
-    }
+func (s *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
+	id := req.GetId()
 
-	{{.SmallResourceNameSingular}} := req.Get{{.CapsResourceNameSingular}}()
-
-	{{.SmallResourceNameSingular}}Response := models.{{.CapsResourceNameSingular}}{
+	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
 		Id: id,
-		{{ range .Fields }}{{ if eq .Name "Id" }}{{ else }}{{ .Name }}: {{$.SmallResourceNameSingular}}.Get{{.Name}},{{ end }}
-		{{ end }}
+        {{range $k, $v := .Fields}}
+            {{if eq $k "Id"}}
+            {{else}}
+                {{$k}}:  req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
+            {{end}}
+        {{end}}
 	}
-	err := {{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}}Response)
+	err := {{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}}Request)
 
 	if err != nil {
 		return nil, err
@@ -119,13 +116,8 @@ func (s *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}
 	}, nil
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) Delete{{.CapsResourceNameSingular}}(ctx context.Context, req *pb.Delete{{.CapsResourceNameSingular}}Request) (*pb.Delete{{.CapsResourceNameSingular}}Response, error) {
-    id, err := strconv.ParseInt(req.GetId(), 10, 64)
-    if err != nil {
-        log.Error(err)
-        return nil, err
-    }
-
+func (s *{{.CapsResourceNameSingular}}Server) Delete{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Delete{{.CapsResourceNameSingular}}Request) (*pb.Delete{{.CapsResourceNameSingular}}Response, error) {
+	id := req.GetId()
 	err := {{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id)
 
 	if err != nil {

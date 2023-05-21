@@ -1,5 +1,5 @@
 proto:
-	if [ -d "gen/api/v1" ]; then rm -rf gen/api/v1; fi && protoc --go_out=./gen --go-grpc_out=./gen api/v1/*.proto 
+	if [ -d "gen/api/v1" ]; then rm -rf gen/api/v1; fi && mkdir -p ./gen && protoc --go_out=./gen --go-grpc_out=./gen api/v1/*.proto
 
 # if this doesn't work, 
 # make sure you have installed go, proto and it's related compiler and necessary packages.
