@@ -32,8 +32,9 @@ func (r *SQLiteClient) Migrate() error {
 	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
 		Id INTEGER PRIMARY KEY AUTOINCREMENT,
         {{range $k, $v := .CreateQueryColumns}}
-        {{$k}} {{$v}} NOT NULL,
+        {{$k}} {{$v}} NOT NULL
         {{end}}
+        CONSTRAINT id_unique_key UNIQUE (Id)
 	)
 	`
 	_, err := r.db.Exec(query)
