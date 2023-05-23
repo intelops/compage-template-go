@@ -1,4 +1,4 @@
-package sql_client
+package {{.SmallResourceNameSingular}}_client
 
 import (
 	"database/sql"
@@ -9,31 +9,6 @@ import (
 	"os"
 	"time"
 )
-
-var (
-	ErrDuplicate    = errors.New("record already exists")
-	ErrNotExists    = errors.New("row not exists")
-	ErrUpdateFailed = errors.New("update failed")
-	ErrDeleteFailed = errors.New("delete failed")
-)
-
-var (
-	user     = os.Getenv("MYSQL_DB_USER")
-	password = os.Getenv("MYSQL_DB_PASSWORD")
-	host     = os.Getenv("MYSQL_DB_HOST")
-	port     = os.Getenv("MYSQL_DB_PORT")
-	database = os.Getenv("MYSQL_DB_DATABASE")
-)
-
-type MySQLClient struct {
-	db *sql.DB
-}
-
-func NewMySQLClient(db *sql.DB) *MySQLClient {
-	return &MySQLClient{
-		db: db,
-	}
-}
 
 func (r *MySQLClient) Migrate() error {
 	query := `

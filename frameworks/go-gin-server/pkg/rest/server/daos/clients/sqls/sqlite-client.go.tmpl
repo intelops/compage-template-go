@@ -1,54 +1,36 @@
-package sql_client
+package {{.SmallResourceNameSingular}}_client
 
 import (
 	"database/sql"
 	"errors"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
+
 	"github.com/mattn/go-sqlite3"
-	"os"
 )
 
-var (
-	ErrDuplicate    = errors.New("record already exists")
-	ErrNotExists    = errors.New("row not exists")
-	ErrUpdateFailed = errors.New("update failed")
-	ErrDeleteFailed = errors.New("delete failed")
-)
-
-const fileName = "sqlite.db"
-
-type SQLiteClient struct {
-	db *sql.DB
-}
-
-func NewSQLiteClient(db *sql.DB) *SQLiteClient {
-	return &SQLiteClient{
-		db: db,
-	}
-}
-
-func (r *SQLiteClient) Migrate() error {
+func Migrate(r *sqls.SQLiteClient) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
 		Id INTEGER PRIMARY KEY AUTOINCREMENT,
         {{range $k, $v := .CreateQueryColumns}}
-        {{$k}} {{$v}} NOT NULL
+        {{$k}} {{$v}} NOT NULL,
         {{end}}
         CONSTRAINT id_unique_key UNIQUE (Id)
 	)
 	`
-	_, err := r.db.Exec(query)
+	_, err := r.DB.Exec(query)
 	return err
 }
 
-func (r *SQLiteClient) Create(m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+func Create(r *sqls.SQLiteClient, m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
-	res, err := r.db.Exec(insertQuery, {{.InsertQueryExecColumns}})
+	res, err := r.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) {
 			if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
-				return nil, ErrDuplicate
+				return nil, sqls.ErrDuplicate
 			}
 		}
 		return nil, err
@@ -63,9 +45,9 @@ func (r *SQLiteClient) Create(m models.{{.CapsResourceNameSingular}}) (*models.{
 	return &m, nil
 }
 
-func (r *SQLiteClient) All() ([]models.{{.CapsResourceNameSingular}}, error) {
+func All(r *sqls.SQLiteClient) ([]models.{{.CapsResourceNameSingular}}, error) {
 	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
-	rows, err := r.db.Query(selectQuery)
+	rows, err := r.DB.Query(selectQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -87,26 +69,26 @@ func (r *SQLiteClient) All() ([]models.{{.CapsResourceNameSingular}}, error) {
 	return all, nil
 }
 
-func (r *SQLiteClient) Get(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+func Get(r *sqls.SQLiteClient, id int64) (*models.{{.CapsResourceNameSingular}}, error) {
 	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
-	row := r.db.QueryRow(selectQuery, id)
+	row := r.DB.QueryRow(selectQuery, id)
 
 	var m models.{{.CapsResourceNameSingular}}
 	if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotExists
+			return nil, sqls.ErrNotExists
 		}
 		return nil, err
 	}
 	return &m, nil
 }
 
-func (r *SQLiteClient) Update(id int64, m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+func Update(r *sqls.SQLiteClient, id int64, m models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id == 0 {
 		return nil, errors.New("invalid updated ID")
 	}
 	updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
-    res, err := r.db.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
+    res, err := r.DB.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
 	if err != nil {
 		return nil, err
 	}
@@ -117,15 +99,15 @@ func (r *SQLiteClient) Update(id int64, m models.{{.CapsResourceNameSingular}}) 
 	}
 
 	if rowsAffected == 0 {
-		return nil, ErrUpdateFailed
+		return nil, sqls.ErrUpdateFailed
 	}
 
 	return &m, nil
 }
 
-func (r *SQLiteClient) Delete(id int64) error {
+func Delete(r *sqls.SQLiteClient, id int64) error {
 	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
-	res, err := r.db.Exec(deleteQuery, id)
+	res, err := r.DB.Exec(deleteQuery, id)
 	if err != nil {
 		return err
 	}
@@ -136,30 +118,8 @@ func (r *SQLiteClient) Delete(id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return ErrDeleteFailed
+		return sqls.ErrDeleteFailed
 	}
 
 	return err
-}
-
-func InitSqliteDB() (*SQLiteClient, error) {
-	if _, err := os.Stat(fileName); err == nil {
-		err1 := os.Remove(fileName)
-		if err1 != nil {
-			return nil, err1
-		}
-	}
-
-	db, err := sql.Open("sqlite3", fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	sqLiteClient := NewSQLiteClient(db)
-
-	if err = sqLiteClient.Migrate(); err != nil {
-		return nil, err
-	}
-
-	return sqLiteClient, nil
 }
