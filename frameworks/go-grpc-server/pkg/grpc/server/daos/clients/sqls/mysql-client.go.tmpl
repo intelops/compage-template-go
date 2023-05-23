@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/go-sql-driver/mysql"
-	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
-    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos/clients/sqls"
 )
 
 func Migrate(r *sqls.MySQLClient) error {
