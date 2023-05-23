@@ -18,8 +18,8 @@ func New{{.CapsResourceNameSingular}}Server() *{{.CapsResourceNameSingular}}Serv
 	return &{{.CapsResourceNameSingular}}Server{}
 }
 
-func (s *{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.Request) (*pb.Response, error) {
-	return &pb.Response{
+func (s *{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.{{.CapsResourceNameSingular}}Request) (*pb.{{.CapsResourceNameSingular}}Response, error) {
+	return &pb.{{.CapsResourceNameSingular}}Response{
 		Message: "Server is healthy and working!",
 	}, nil
 }

@@ -2,27 +2,32 @@ package daos
 
 import (
 	"errors"
-    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sql"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls/{{.SmallResourceNameSingular}}_client"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
-	sqlClient *sql_client.SQLiteClient
+	sqlClient *sqls.SQLiteClient
 }
 
 func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
-	dbRepository, err := sql_client.InitSqliteDB()
+	sqlClient, err := sqls.InitSqliteDB()
 	if err != nil {
 		return nil, err
 	}
+	err = {{.SmallResourceNameSingular}}_client.Migrate(sqlClient)
+    if err != nil {
+        return nil, err
+    }
 	return &{{.CapsResourceNameSingular}}Dao{
-		dbRepository,
+		sqlClient,
 	}, nil
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	_, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Create({{.SmallResourceNameSingular}})
+	_, err := {{.SmallResourceNameSingular}}_client.Create({{.SmallResourceNameSingular}}Dao.sqlClient, {{.SmallResourceNameSingular}})
 	if err != nil {
 		return err
 	}
@@ -34,7 +39,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     if id != {{.SmallResourceNameSingular}}.Id {
 		return errors.New("id and payload don't match")
 	}
-	_, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Update(id, {{.SmallResourceNameSingular}})
+	_, err := {{.SmallResourceNameSingular}}_client.Update({{.SmallResourceNameSingular}}Dao.sqlClient, id, {{.SmallResourceNameSingular}})
 	if err != nil {
 		return err
 	}
@@ -43,7 +48,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
-    err := {{.SmallResourceNameSingular}}Dao.sqlClient.Delete(id)
+    err := {{.SmallResourceNameSingular}}_client.Delete({{.SmallResourceNameSingular}}Dao.sqlClient, id)
 	if err != nil {
 		return err
 	}
@@ -52,7 +57,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
-    {{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Dao.sqlClient.All()
+    {{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}_client.All({{.SmallResourceNameSingular}}Dao.sqlClient)
 	if err != nil {
 		return {{.SmallResourceNamePlural}}, err
 	}
@@ -61,7 +66,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.sqlClient.Get(id)
+	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}_client.Get({{.SmallResourceNameSingular}}Dao.sqlClient, id)
 	if err != nil {
 		return models.{{.CapsResourceNameSingular}}{}, err
 	}

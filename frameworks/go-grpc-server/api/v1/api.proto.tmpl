@@ -4,7 +4,7 @@ package pb;
 option go_package="./api/v1;pb";
 
 service {{ .CapsResourceNameSingular }}Service {
-    rpc Ping (Request) returns (Response) {};
+    rpc Ping ({{.CapsResourceNameSingular}}Request) returns ({{.CapsResourceNameSingular}}Response) {};
     rpc Create{{.CapsResourceNameSingular}} (Create{{.CapsResourceNameSingular}}Request) returns (Create{{.CapsResourceNameSingular}}Response) {};
     rpc Get{{.CapsResourceNameSingular}} (Get{{.CapsResourceNameSingular}}Request) returns (Get{{.CapsResourceNameSingular}}Response) {};
     rpc Update{{.CapsResourceNameSingular}} (Update{{.CapsResourceNameSingular}}Request) returns (Update{{.CapsResourceNameSingular}}Response) {};
@@ -60,8 +60,8 @@ message List{{.CapsResourceNamePlural}}Response {
     repeated {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 1;
 }
 
-message Request {}
+message {{.CapsResourceNameSingular}}Request {}
 
-message Response {
+message {{.CapsResourceNameSingular}}Response {
     string message = 1; 
 }
