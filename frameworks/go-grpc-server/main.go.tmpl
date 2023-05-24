@@ -57,7 +57,9 @@ func main() {
 	}
 	{{end}}
 
+	// call external service here if the IsRestClient value is true
+	// (that means this repo is a client to external service)
 	{{if .IsGrpcClient }}
-    client.Execute()
-    {{end}}	
+      client.Execute()
+    {{end}}
 }

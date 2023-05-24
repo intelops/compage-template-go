@@ -51,13 +51,13 @@ func main() {
         {{end}}
     }
 
-	// call external client here if the isRestClient value is true
-
 	Port := ":{{.RestServerPort}}"
 	if err := router.Run(Port); err != nil {
 		return
 	}
    {{end}}
+	// call external service here if the IsRestClient value is true
+	// (that means this repo is a client to external service)
    {{if .IsRestClient }}
     b, err := client.Execute()
     if err!=nil {
