@@ -1,0 +1,10 @@
+# {{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
+{{.NodeName}}
+
+{{if .IsRestServer }}
+### REST Server
+{{end}}
+
+{{if .IsGrpcServer }}
+### gRPC Server
+{{end}}
