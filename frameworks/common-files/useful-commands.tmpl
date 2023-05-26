@@ -1,4 +1,5 @@
 {{if .IsGrpcServer }}
+# grpcurl commands for gRPC Server
 
 # Install grpcurl to access grpc services
     go get github.com/fullstorydev/grpcurl/...
@@ -26,5 +27,41 @@
 # To describe any Message
     grpcurl -plaintext -msg-template localhost:50051 describe pb.MessageRequest
     # grpcurl -plaintext -msg-template localhost:50051 describe MessageName
+
+{{end}}
+
+{{if .IsRestServer }}
+# Curl commands for REST Server
+# sample Post curl command
+curl -X POST -H "Content-Type: application/json" \
+-d '{"id":"123","name": "John", "city": "Pune"}' \
+http://localhost:8080/v1/users
+
+# sample Get curl command
+curl -X GET -H "Content-Type: application/json" \
+http://localhost:8080/v1/users
+
+# sample Put curl command
+curl -X PUT -H "Content-Type: application/json" \
+-d '{"id":"123","name": "John", "city": "Pune"}' \
+http://localhost:8080/v1/users/123
+
+# sample Put curl command
+### wrong id passed in param
+curl -X PUT -H "Content-Type: application/json" \
+-d '{"id":"123","name": "John", "city": "Pune"}' \
+http://localhost:8080/v1/users/1234
+
+# sample Get curl command (retrieve specific user)
+curl -X GET -H "Content-Type: application/json" \
+http://localhost:8080/v1/users/123
+
+# sample Delete curl command
+curl -X DELETE -H "Content-Type: application/json" \
+http://localhost:8080/v1/users/123
+
+# when mysql throws error about server connection, fire below commands
+# CREATE USER 'root'@'%' IDENTIFIED BY 'password';
+# GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
 
 {{end}}

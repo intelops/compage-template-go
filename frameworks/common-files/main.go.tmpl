@@ -1,0 +1,260 @@
+package main
+
+import (
+{{if and .IsRestServer .IsGrpcServer}}
+        "fmt"
+        "net"
+        "os"
+        pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
+        grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/reflection"
+
+        "context"
+        restcontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+        "github.com/gin-gonic/gin"
+        "github.com/prometheus/client_golang/prometheus/promhttp"
+        "github.com/sinhashubham95/go-actuator"
+        log "github.com/sirupsen/logrus"
+        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+        "go.opentelemetry.io/otel"
+        "go.opentelemetry.io/otel/attribute"
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+        "go.opentelemetry.io/otel/sdk/resource"
+        sdktrace "go.opentelemetry.io/otel/sdk/trace"
+        "google.golang.org/grpc/credentials"
+    {{else if .IsGrpcServer }}
+        "fmt"
+        "net"
+        "os"
+        log "github.com/sirupsen/logrus"
+
+        pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
+        grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
+
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/reflection"
+
+    {{else if .IsRestServer }}
+        "context"
+        restcontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+        "github.com/gin-gonic/gin"
+        "github.com/prometheus/client_golang/prometheus/promhttp"
+        "github.com/sinhashubham95/go-actuator"
+        log "github.com/sirupsen/logrus"
+        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+        "go.opentelemetry.io/otel"
+        "go.opentelemetry.io/otel/attribute"
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+        "go.opentelemetry.io/otel/sdk/resource"
+        sdktrace "go.opentelemetry.io/otel/sdk/trace"
+        "google.golang.org/grpc/credentials"
+        "os"
+{{end}}
+
+{{if .IsRestClient}}
+    "fmt"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
+{{end}}
+{{if .IsGrpcClient}}
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/client"
+{{end}}
+)
+
+
+{{if .IsGrpcServer }}
+var (
+	host = "localhost"
+	port = "{{.GrpcServerPort}}"
+)
+{{end}}
+
+
+func main() {
+ {{if .IsGrpcServer }}
+	// Set up the TCP listener
+	addr := fmt.Sprintf("%s:%s", host, port)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Printf("error while starting TCP listener: %s", err)
+		os.Exit(1)
+	}
+
+    log.Printf("TCP listener started at port: %s", port)
+
+	// Create a new gRPC server
+	grpcServer := grpc.NewServer()
+
+ {{range $i, $v := .GrpcResources}}
+	// Create the {{$v.CapsResourceNameSingular}} server
+	{{$v.SmallResourceNamePlural}}Server := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
+	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
+	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNamePlural}}Server)
+  {{end}}
+	// Enable reflection for the gRPC server
+	reflection.Register(grpcServer)
+ {{end}}
+ {{if and .IsRestServer .IsGrpcServer}}
+    go func() {
+        // Start serving gRPC requests
+        if err := grpcServer.Serve(lis); err != nil {
+            log.Printf("error serving gRPC: %s", err)
+            os.Exit(1)
+        }
+    }()
+ {{else if .IsGrpcServer}}
+    // Start serving gRPC requests
+    if err := grpcServer.Serve(lis); err != nil {
+        log.Printf("error serving gRPC: %s", err)
+        os.Exit(1)
+    }
+ {{end}}
+
+ {{if .IsRestServer }}
+	router := gin.Default()
+    if len(serviceName) > 0 && len(collectorURL) > 0 {
+        // add opentel
+        cleanup := initTracer()
+        defer func(func(context.Context) error) {
+            _ = cleanup(context.Background())
+        }(cleanup)
+        router.Use(otelgin.Middleware(serviceName))
+    }
+
+    // add actuator
+	addActuator(router)
+	// add prometheus
+	addPrometheus(router)
+
+    v1 := router.Group("/v1")
+    {
+        {{range $i, $v := .RestResources}}
+            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Get{{$v.CapsResourceNameSingular}})
+            v1.POST("/{{$v.SmallResourceNamePlural}}", restcontrollers.Create{{$v.CapsResourceNameSingular}})
+            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Update{{$v.CapsResourceNameSingular}})
+            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Delete{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}", restcontrollers.List{{$v.CapsResourceNamePlural}})
+            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Patch{{$v.CapsResourceNameSingular}})
+            v1.HEAD("/{{$v.SmallResourceNamePlural}}", restcontrollers.Head{{$v.CapsResourceNameSingular}})
+            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", restcontrollers.Options{{$v.CapsResourceNameSingular}})
+        {{end}}
+    }
+
+	Port := ":{{.RestServerPort}}"
+	if err := router.Run(Port); err != nil {
+        log.Printf("error occurred: %s", err)
+		return
+	}
+ {{end}}
+ {{if .IsRestClient }}
+    // call external service here if the IsRestClient value is true
+    // (that means this repo is a client to external service)
+    b, err := client.Execute()
+    if err!=nil {
+        log.Printf("error occurred: %s", err)
+        return
+    }
+    log.Printf("response received: %s", string(b))
+ {{end}}
+ {{if .IsGrpcClient }}
+   	 // call external service here if the IsGrpcClient value is true
+   	 // (that means this repo is a client to external service)
+     client.Execute()
+ {{end}}
+}
+
+{{if .IsRestServer }}
+
+var (
+	serviceName  = os.Getenv("SERVICE_NAME")
+	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	insecure     = os.Getenv("INSECURE_MODE")
+)
+
+func prometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func addPrometheus(router *gin.Engine) {
+	router.GET("/metrics", prometheusHandler())
+}
+
+func addActuator(router *gin.Engine) {
+	actuatorHandler := actuator.GetActuatorHandler(&actuator.Config{Endpoints: []int{
+		actuator.Env,
+		actuator.Info,
+		actuator.Metrics,
+		actuator.Ping,
+		//actuator.Shutdown,
+		actuator.ThreadDump,
+	},
+		Env:     "dev",
+		Name:    "{{.NodeName}}",
+		Port:    {{.RestServerPort}},
+		Version: "0.0.1",
+	})
+	ginActuatorHandler := func(ctx *gin.Context) {
+		actuatorHandler(ctx.Writer, ctx.Request)
+	}
+	router.GET("/actuator/*endpoint", ginActuatorHandler)
+}
+
+func initTracer() func(context.Context) error {
+	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
+	if len(insecure) > 0 {
+		secureOption = otlptracegrpc.WithInsecure()
+	}
+
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracegrpc.NewClient(
+			secureOption,
+			otlptracegrpc.WithEndpoint(collectorURL),
+		),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	restResources, err := resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			attribute.String("services.name", serviceName),
+			attribute.String("library.language", "go"),
+		),
+	)
+	if err != nil {
+		log.Printf("could not set restResources: %s", err)
+	}
+
+	otel.SetTracerProvider(
+		sdktrace.NewTracerProvider(
+			sdktrace.WithSampler(sdktrace.AlwaysSample()),
+			sdktrace.WithBatcher(exporter),
+			sdktrace.WithResource(restResources),
+		),
+	)
+	return exporter.Shutdown
+}
+
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	//log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: false,
+		FullTimestamp: true,
+	})
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+	// Only log the warning severity or above.
+	log.SetLevel(log.InfoLevel)
+}
+
+{{end}}
