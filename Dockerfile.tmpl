@@ -10,7 +10,9 @@ WORKDIR /app
 COPY . .
 
 # Build application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+# below is failing for sqlite - https://github.com/mattn/go-sqlite3/issues/384#issuecomment-290291449
+# RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+RUN go build -o main .
 
 # Container start command for development
 CMD ["go", "run", "main.go"]
