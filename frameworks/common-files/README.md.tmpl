@@ -9,4 +9,25 @@
 ### gRPC Server
 {{end}}
 
+{{if .IsRestSQLDB }}
+    {{if eq .RestSQLDB "MySQL" }}
+### MySQL Properties for REST
+export MYSQL_DB_USER=root
+export MYSQL_DB_PASSWORD=password
+export MYSQL_DB_HOST=
+export MYSQL_DB_PORT=
+export MYSQL_DB_DATABASE=
+    {{end}}
+{{end}}
+{{if .IsGrpcSQLDB }}
+    {{if eq .GrpcSQLDB "MySQL" }}
+### MySQL Properties for gRPC
+export MYSQL_DB_USER=root
+export MYSQL_DB_PASSWORD=password
+export MYSQL_DB_HOST=
+export MYSQL_DB_PORT=
+export MYSQL_DB_DATABASE=
+    {{end}}
+{{end}}
+
 [![Open in DevPod!](https://devpod.sh/assets/open-in-devpod.svg)](https://devpod.sh/open#https://github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}})
