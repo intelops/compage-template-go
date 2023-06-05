@@ -11,7 +11,7 @@ import (
 
 
 func Execute(){
-    url := {{.GrpcClientServiceName}}:{{.GrpcClientPort}}
+    url := "localhost:{{.GrpcServerPort}}"
 
     conn, err := grpc.Dial(url ,grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -21,7 +21,7 @@ func Execute(){
 
     {{.SmallResourceNameSingular}}Client := pb.New{{.CapsResourceNameSingular}}ServiceClient(conn)
 
-    ping, err := {{.SmallResourceNameSingular}}Client.Ping(context.Background(), &pb.Request{})
+    ping, err := {{.SmallResourceNameSingular}}Client.Ping(context.Background(), &pb.{{.CapsResourceNameSingular}}Request{})
 
     if err != nil {
 		log.Fatal(err)
