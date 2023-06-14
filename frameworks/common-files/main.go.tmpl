@@ -55,7 +55,6 @@ import (
 {{end}}
 
 {{if .IsRestClient}}
-    "fmt"
     "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
 {{end}}
 {{if .IsGrpcClient}}
