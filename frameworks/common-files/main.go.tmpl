@@ -54,10 +54,10 @@ import (
         "os"
 {{end}}
 
-{{if .IsRestClient}}
+{{if .HasRestClients}}
     "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/client"
 {{end}}
-{{if .IsGrpcClient}}
+{{if .HasGrpcClients}}
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/client"
 {{end}}
 )
@@ -147,18 +147,21 @@ func main() {
 		return
 	}
  {{end}}
- {{if .IsRestClient }}
-    // call external service here if the IsRestClient value is true
-    // (that means this repo is a client to external service)
-    b, err := client.Execute{{.RestClientSourceNodeID}}()
-    if err!=nil {
-        log.Printf("error occurred: %s", err)
-        return
-    }
-    log.Printf("response received: %s", string(b))
+ {{if .HasRestClients}}
+    // call external services here if the HasRestClients value is true
+    // (that means this repo is a client to external service(s)
+    var err error
+    {{range $i, $v := .RestClients}}
+        b{{$v.SourceNodeID}}, err := client.Execute{{$v.SourceNodeID}}()
+        if err!=nil {
+            log.Printf("error occurred: %s", err)
+            return
+        }
+        log.Printf("response received: %s", string(b{{$v.SourceNodeID}}))
+    {{end}}
  {{end}}
- {{if .IsGrpcClient }}
-   	 // call external service here if the IsGrpcClient value is true
+ {{if .HasGrpcClients }}
+   	 // call external service here if the HasGrpcClients value is true
    	 // (that means this repo is a client to external service)
      client.Execute()
  {{end}}
