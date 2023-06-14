@@ -150,7 +150,7 @@ func main() {
  {{if .IsRestClient }}
     // call external service here if the IsRestClient value is true
     // (that means this repo is a client to external service)
-    b, err := client.Execute()
+    b, err := client.Execute{{.RestClientSourceNodeID}}()
     if err!=nil {
         log.Printf("error occurred: %s", err)
         return
