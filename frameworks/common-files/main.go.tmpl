@@ -150,11 +150,11 @@ func main() {
  {{if .HasRestClients}}
     // call external services here if the HasRestClients value is true
     // (that means this repo is a client to external service(s)
-    var err error
+    var err0 error
     {{range $i, $v := .RestClients}}
-        b{{$v.SourceNodeID}}, err := client.Execute{{$v.SourceNodeID}}()
-        if err!=nil {
-            log.Printf("error occurred: %s", err)
+        b{{$v.SourceNodeID}}, err0 := client.Execute{{$v.SourceNodeID}}()
+        if err0!=nil {
+            log.Printf("error occurred: %s", err0)
             return
         }
         log.Printf("response received: %s", string(b{{$v.SourceNodeID}}))

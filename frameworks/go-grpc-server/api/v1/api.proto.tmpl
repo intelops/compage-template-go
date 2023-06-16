@@ -15,7 +15,7 @@ service {{ .CapsResourceNameSingular }}Service {
 message {{.CapsResourceNameSingular}} {
     int64 id = 1;
     {{range $index, $value := .FieldNames}}
-    {{index $.Fields $value}} {{$value}} = {{incCount $index}};
+    {{index $.ProtoFields $value}} {{$value}} = {{incCount $index}};
     {{end}}
 }
 
