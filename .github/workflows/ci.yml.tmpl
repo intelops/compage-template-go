@@ -33,6 +33,7 @@ jobs:
       - name: Build
         run: |
           cd [[.NodeName]]
+          go mod tidy
           go build -v ./...
           cd ..
       - name: golangci-lint
