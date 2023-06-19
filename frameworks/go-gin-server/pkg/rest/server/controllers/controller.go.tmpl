@@ -9,9 +9,21 @@ import (
     "strconv"
 )
 
-var {{.SmallResourceNameSingular}}Service = services.New{{.CapsResourceNameSingular}}Service()
+type {{.CapsResourceNameSingular}}Controller struct {
+	{{.SmallResourceNameSingular}}Service *services.{{.CapsResourceNameSingular}}Service
+}
 
-func Create{{.CapsResourceNameSingular}}(context *gin.Context) {
+func New{{.CapsResourceNameSingular}}Controller() (*{{.CapsResourceNameSingular}}Controller, error) {
+	{{.SmallResourceNameSingular}}Service, err := services.New{{.CapsResourceNameSingular}}Service()
+	if err != nil {
+		return nil, err
+	}
+	return &{{.CapsResourceNameSingular}}Controller{
+		{{.SmallResourceNameSingular}}Service: {{.SmallResourceNameSingular}}Service,
+	}, nil
+}
+
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Create{{.CapsResourceNameSingular}}(context *gin.Context) {
 	// validate input
 	var input models.{{.CapsResourceNameSingular}}
 	if err := context.ShouldBindJSON(&input); err != nil {
@@ -21,7 +33,7 @@ func Create{{.CapsResourceNameSingular}}(context *gin.Context) {
 	}
 
 	// trigger {{.SmallResourceNameSingular}} creation
-	if err := {{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(input); err != nil {
+	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -30,7 +42,7 @@ func Create{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "{{.CapsResourceNameSingular}} created successfully"})
 }
 
-func Update{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 	// validate input
 	var input models.{{.CapsResourceNameSingular}}
 	if err := context.ShouldBindJSON(&input); err != nil {
@@ -47,7 +59,7 @@ func Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 	}
 
 	// trigger {{.SmallResourceNameSingular}} update
-	if err := {{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, input); err != nil {
+	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -56,7 +68,7 @@ func Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "{{.CapsResourceNameSingular}} updated successfully"})
 }
 
-func Get{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Get{{.CapsResourceNameSingular}}(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		log.Error(err)
@@ -65,7 +77,7 @@ func Get{{.CapsResourceNameSingular}}(context *gin.Context) {
 	}
 
 	// trigger {{.SmallResourceNameSingular}} fetching
-	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
+	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
 	if err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -75,7 +87,7 @@ func Get{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, {{.SmallResourceNameSingular}})
 }
 
-func Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		log.Error(err)
@@ -84,7 +96,7 @@ func Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
 	}
 
 	// trigger {{.SmallResourceNameSingular}} deletion
-	if err := {{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {
+	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -95,9 +107,9 @@ func Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
 	})
 }
 
-func List{{.CapsResourceNamePlural}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) List{{.CapsResourceNamePlural}}(context *gin.Context) {
 	// trigger all {{.SmallResourceNamePlural}} fetching
-	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
+	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
 	if err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -107,18 +119,18 @@ func List{{.CapsResourceNamePlural}}(context *gin.Context) {
 	context.JSON(http.StatusOK, {{.SmallResourceNamePlural}})
 }
 
-func Patch{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Patch{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "PATCH",
 	})
 }
-func Options{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Options{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "OPTIONS",
 	})
 }
 
-func Head{{.CapsResourceNameSingular}}(context *gin.Context) {
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Head{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "HEAD",
 	})

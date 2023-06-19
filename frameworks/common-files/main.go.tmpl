@@ -2,7 +2,6 @@ package main
 
 import (
 {{if and .IsRestServer .IsGrpcServer}}
-        "fmt"
         "net"
         "os"
         pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
@@ -25,7 +24,6 @@ import (
         sdktrace "go.opentelemetry.io/otel/sdk/trace"
         "google.golang.org/grpc/credentials"
     {{else if .IsGrpcServer }}
-        "fmt"
         "net"
         "os"
         log "github.com/sirupsen/logrus"
@@ -74,10 +72,10 @@ var (
 func main() {
  {{if .IsGrpcServer }}
 	// Set up the TCP listener
-	addr := fmt.Sprintf("%s:%s", host, port)
+	addr := net.JoinHostPort(host, port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Printf("error while starting TCP listener: %s", err)
+		log.Errorf("error while starting TCP listener: %s", err)
 		os.Exit(1)
 	}
 
@@ -88,7 +86,11 @@ func main() {
 
  {{range $i, $v := .GrpcResources}}
 	// Create the {{$v.CapsResourceNameSingular}} server
-	{{$v.SmallResourceNamePlural}}Server := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
+	{{$v.SmallResourceNamePlural}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
+    if err != nil {
+        log.Errorf("error while creating {{$v.CapsResourceNameSingular}}Server: %s", err)
+        os.Exit(1)
+    }
 	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
 	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNamePlural}}Server)
   {{end}}
@@ -99,14 +101,14 @@ func main() {
     go func() {
         // Start serving gRPC requests
         if err := grpcServer.Serve(lis); err != nil {
-            log.Printf("error serving gRPC: %s", err)
+            log.Errorf("error serving gRPC: %s", err)
             os.Exit(1)
         }
     }()
  {{else if .IsGrpcServer}}
     // Start serving gRPC requests
     if err := grpcServer.Serve(lis); err != nil {
-        log.Printf("error serving gRPC: %s", err)
+        log.Errorf("error serving gRPC: %s", err)
         os.Exit(1)
     }
  {{end}}
@@ -127,6 +129,13 @@ func main() {
 	// add prometheus
 	addPrometheus(router)
 
+    {{range $i, $v := .RestResources}}
+        {{$v.SmallResourceNamePlural}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
+        if err != nil {
+            log.Errorf("error occurred: %s", err)
+            os.Exit(1)
+        }
+    {{end}}
     v1 := router.Group("/v1")
     {
         {{range $i, $v := .RestResources}}
@@ -142,8 +151,9 @@ func main() {
     }
 
 	Port := ":{{.RestServerPort}}"
+	log.Println("Server started")
 	if err := router.Run(Port); err != nil {
-        log.Printf("error occurred: %s", err)
+        log.Errorf("error occurred: %s", err)
 		return
 	}
  {{end}}

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos/clients/sqls"
-
-	//"github.com/mattn/go-sqlite3"
 )
 
 func Migrate(r *sqls.SQLiteClient) error {
@@ -27,12 +25,6 @@ func Create(r *sqls.SQLiteClient, m models.{{.CapsResourceNameSingular}}) (*mode
 	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
 	res, err := r.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
 	if err != nil {
-		//var sqliteErr sqlite3.Error
-		//if errors.As(err, &sqliteErr) {
-		//	if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
-		//		return nil, sqls.ErrDuplicate
-		//	}
-		//}
 		return nil, err
 	}
 
