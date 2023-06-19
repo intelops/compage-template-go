@@ -75,8 +75,7 @@ func main() {
 	addr := net.JoinHostPort(host, port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Errorf("error while starting TCP listener: %s", err)
-		os.Exit(1)
+		log.Fatalf("error while starting TCP listener: %s", err)
 	}
 
     log.Printf("TCP listener started at port: %s", port)
@@ -88,8 +87,7 @@ func main() {
 	// Create the {{$v.CapsResourceNameSingular}} server
 	{{$v.SmallResourceNamePlural}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
     if err != nil {
-        log.Errorf("error while creating {{$v.CapsResourceNameSingular}}Server: %s", err)
-        os.Exit(1)
+        log.Fatalf("error while creating {{$v.CapsResourceNameSingular}}Server: %s", err)
     }
 	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
 	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNamePlural}}Server)
@@ -102,14 +100,14 @@ func main() {
         // Start serving gRPC requests
         if err = grpcServer.Serve(lis); err != nil {
             log.Errorf("error serving gRPC: %s", err)
-            os.Exit(1)
+            return
         }
     }()
  {{else if .IsGrpcServer}}
     // Start serving gRPC requests
     if err := grpcServer.Serve(lis); err != nil {
         log.Errorf("error serving gRPC: %s", err)
-        os.Exit(1)
+        return
     }
  {{end}}
 
@@ -132,8 +130,7 @@ func main() {
     {{range $i, $v := .RestResources}}
         {{$v.SmallResourceNamePlural}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
         if err != nil {
-            log.Errorf("error occurred: %s", err)
-            os.Exit(1)
+            log.Fatalf("error occurred: %s", err)
         }
     {{end}}
     v1 := router.Group("/v1")
@@ -203,7 +200,7 @@ func addActuator(router *gin.Engine) {
 		actuator.Info,
 		actuator.Metrics,
 		actuator.Ping,
-		//actuator.Shutdown,
+		// actuator.Shutdown,
 		actuator.ThreadDump,
 	},
 		Env:     "dev",
@@ -257,7 +254,7 @@ func initTracer() func(context.Context) error {
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
-	//log.SetFormatter(&log.JSONFormatter{})
+	// log.SetFormatter(&log.JSONFormatter{})
 	log.SetFormatter(&log.TextFormatter{
 		DisableColors: false,
 		FullTimestamp: true,
