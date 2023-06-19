@@ -100,7 +100,7 @@ func main() {
  {{if and .IsRestServer .IsGrpcServer}}
     go func() {
         // Start serving gRPC requests
-        if err := grpcServer.Serve(lis); err != nil {
+        if err = grpcServer.Serve(lis); err != nil {
             log.Errorf("error serving gRPC: %s", err)
             os.Exit(1)
         }
@@ -139,20 +139,20 @@ func main() {
     v1 := router.Group("/v1")
     {
         {{range $i, $v := .RestResources}}
-            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Get{{$v.CapsResourceNameSingular}})
-            v1.POST("/{{$v.SmallResourceNamePlural}}", restcontrollers.Create{{$v.CapsResourceNameSingular}})
-            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Update{{$v.CapsResourceNameSingular}})
-            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Delete{{$v.CapsResourceNameSingular}})
-            v1.GET("/{{$v.SmallResourceNamePlural}}", restcontrollers.List{{$v.CapsResourceNamePlural}})
-            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", restcontrollers.Patch{{$v.CapsResourceNameSingular}})
-            v1.HEAD("/{{$v.SmallResourceNamePlural}}", restcontrollers.Head{{$v.CapsResourceNameSingular}})
-            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", restcontrollers.Options{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Get{{$v.CapsResourceNameSingular}})
+            v1.POST("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Create{{$v.CapsResourceNameSingular}})
+            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Update{{$v.CapsResourceNameSingular}})
+            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Delete{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.List{{$v.CapsResourceNamePlural}})
+            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Patch{{$v.CapsResourceNameSingular}})
+            v1.HEAD("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Head{{$v.CapsResourceNameSingular}})
+            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Options{{$v.CapsResourceNameSingular}})
         {{end}}
     }
 
 	Port := ":{{.RestServerPort}}"
 	log.Println("Server started")
-	if err := router.Run(Port); err != nil {
+	if err = router.Run(Port); err != nil {
         log.Errorf("error occurred: %s", err)
 		return
 	}
