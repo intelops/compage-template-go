@@ -75,7 +75,8 @@ func main() {
 	addr := net.JoinHostPort(host, port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("error while starting TCP listener: %s", err)
+		log.Errorf("error while starting TCP listener: %s", err)
+		return
 	}
 
     log.Printf("TCP listener started at port: %s", port)
@@ -85,12 +86,13 @@ func main() {
 
  {{range $i, $v := .GrpcResources}}
 	// Create the {{$v.CapsResourceNameSingular}} server
-	{{$v.SmallResourceNamePlural}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
+	{{$v.SmallResourceNameSingular}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
     if err != nil {
-        log.Fatalf("error while creating {{$v.CapsResourceNameSingular}}Server: %s", err)
+        log.Errorf("error while creating {{$v.SmallResourceNameSingular}}Server: %s", err)
+        return
     }
 	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
-	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNamePlural}}Server)
+	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNameSingular}}Server)
   {{end}}
 	// Enable reflection for the gRPC server
 	reflection.Register(grpcServer)
@@ -128,22 +130,23 @@ func main() {
 	addPrometheus(router)
 
     {{range $i, $v := .RestResources}}
-        {{$v.SmallResourceNamePlural}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
+        {{$v.SmallResourceNameSingular}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
         if err != nil {
-            log.Fatalf("error occurred: %s", err)
+            log.Errorf("error occurred: %s", err)
+            return
         }
     {{end}}
     v1 := router.Group("/v1")
     {
         {{range $i, $v := .RestResources}}
-            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Get{{$v.CapsResourceNameSingular}})
-            v1.POST("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Create{{$v.CapsResourceNameSingular}})
-            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Update{{$v.CapsResourceNameSingular}})
-            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Delete{{$v.CapsResourceNameSingular}})
-            v1.GET("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.List{{$v.CapsResourceNamePlural}})
-            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNamePlural}}Controller.Patch{{$v.CapsResourceNameSingular}})
-            v1.HEAD("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Head{{$v.CapsResourceNameSingular}})
-            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNamePlural}}Controller.Options{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Fetch{{$v.CapsResourceNameSingular}})
+            v1.POST("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Create{{$v.CapsResourceNameSingular}})
+            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Update{{$v.CapsResourceNameSingular}})
+            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Delete{{$v.CapsResourceNameSingular}})
+            v1.GET("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.List{{$v.CapsResourceNamePlural}})
+            v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Patch{{$v.CapsResourceNameSingular}})
+            v1.HEAD("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Head{{$v.CapsResourceNameSingular}})
+            v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Options{{$v.CapsResourceNameSingular}})
         {{end}}
     }
 
@@ -229,7 +232,8 @@ func initTracer() func(context.Context) error {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+        log.Errorf("error occurred: %s", err)
+        return nil
 	}
 	restResources, err := resource.New(
 		context.Background(),
