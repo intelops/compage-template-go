@@ -41,3 +41,20 @@ func InitSqliteDB() (*SQLiteClient, error) {
 
 	return sqliteClient, err
 }
+
+
+{{range $i, $n := .RestResources}}
+func Migrate{{$n.CapsResourceNamePlural}}(r *SQLiteClient) error {
+	query := `
+	CREATE TABLE IF NOT EXISTS {{$n.SmallResourceNamePlural}}(
+		Id INTEGER PRIMARY KEY AUTOINCREMENT,
+        {{range $k, $v := $.CreateQueryColumns}}
+        {{$k}} {{$v}} NOT NULL,
+        {{end}}
+        CONSTRAINT id_unique_key UNIQUE (Id)
+	)
+	`
+	_, err1 := r.DB.Exec(query)
+	return err1
+}
+{{end}}
