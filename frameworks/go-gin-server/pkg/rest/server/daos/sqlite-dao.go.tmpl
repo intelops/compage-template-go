@@ -16,9 +16,7 @@ func migrate{{.CapsResourceNamePlural}}(r *sqls.SQLiteClient) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
 		Id INTEGER PRIMARY KEY AUTOINCREMENT,
-        {{range $k, $v := $.CreateQueryColumns}}
-        {{$k}} {{$v}} NOT NULL,
-        {{end}}
+        {{.CreateQueryColumns}}
         CONSTRAINT id_unique_key UNIQUE (Id)
 	)
 	`
@@ -109,8 +107,12 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
     }(rows)
     var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
     for rows.Next() {
-        var m models.{{.CapsResourceNameSingular}}
-        if err := rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+        m := models.{{.CapsResourceNameSingular}} {
+           {{range $k, $v := .Fields}}
+               {{GetCompositeFields $k}}
+           {{end}}
+        }
+        if err = rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
             return nil, err
         }
         {{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, &m)
@@ -126,7 +128,11 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
     selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
     row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
-    var m models.{{.CapsResourceNameSingular}}
+    m := models.{{.CapsResourceNameSingular}} {
+       {{range $k, $v := .Fields}}
+           {{GetCompositeFields $k}}
+       {{end}}
+    }
     if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, sqls.ErrNotExists
