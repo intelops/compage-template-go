@@ -61,6 +61,15 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     if id != m.Id {
         return nil, errors.New("id and payload don't match")
     }
+
+    {{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
+    if err != nil {
+        return nil, err
+    }
+    if {{.SmallResourceNameSingular}} == nil {
+        return nil, sql.ErrNoRows
+    }
+
     updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
     if err != nil {
