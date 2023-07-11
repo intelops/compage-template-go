@@ -40,7 +40,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
         {{end}}
 	}
 
-	if err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}}); err != nil {
+	if _, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&{{.SmallResourceNameSingular}}); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +111,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
             {{end}}
         {{end}}
 	}
-	err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}}Request)
+	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &{{.SmallResourceNameSingular}}Request)
 
 	if err != nil {
 		return nil, err

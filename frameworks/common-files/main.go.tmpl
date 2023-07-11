@@ -25,7 +25,6 @@ import (
         "google.golang.org/grpc/credentials"
     {{else if .IsGrpcServer }}
         "net"
-        "os"
         log "github.com/sirupsen/logrus"
 
         pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"

@@ -15,13 +15,14 @@ var (
 	ErrDeleteFailed = errors.New("delete failed")
 )
 
+var o sync.Once
+
 const FileName = "sqlite.db"
 
 type SQLiteClient struct {
 	DB *sql.DB
 }
 
-var o sync.Once
 var err error
 var sqliteClient *SQLiteClient
 
