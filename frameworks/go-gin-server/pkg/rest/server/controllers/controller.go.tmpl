@@ -33,13 +33,13 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	}
 
 	// trigger {{.SmallResourceNameSingular}} creation
-	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(input); err != nil {
+	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "{{.CapsResourceNameSingular}} created successfully"})
+	context.JSON(http.StatusCreated, gin.H{"message": "{{.CapsResourceNameSingular}} created successfully"})
 }
 
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
@@ -47,7 +47,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	var input models.{{.CapsResourceNameSingular}}
 	if err := context.ShouldBindJSON(&input); err != nil {
 		log.Error(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -59,7 +59,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	}
 
 	// trigger {{.SmallResourceNameSingular}} update
-	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, input); err != nil {
+	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

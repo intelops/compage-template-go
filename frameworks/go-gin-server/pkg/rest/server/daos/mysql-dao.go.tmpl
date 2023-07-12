@@ -1,9 +1,10 @@
 package daos
 
 import (
+	"database/sql"
 	"errors"
+	"github.com/go-sql-driver/mysql"
     "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
-    {{.SmallResourceNameSingular}}Client "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls/{{.SmallKebabCaseResourceNameSingular}}-client"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
 )
@@ -12,12 +13,24 @@ type {{.CapsResourceNameSingular}}Dao struct {
 	sqlClient *sqls.MySQLClient
 }
 
+func migrate{{.CapsResourceNamePlural}}(r *sqls.MySQLClient) error {
+	query := `
+	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
+		ID int NOT NULL AUTO_INCREMENT,
+        {{.CreateQueryColumns}}
+	    PRIMARY KEY (ID)
+	);
+	`
+	_, err := r.DB.Exec(query)
+	return err
+}
+
 func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
 	sqlClient, err := sqls.InitMySQLDB()
 	if err != nil {
 		return nil, err
 	}
-	err = {{.SmallResourceNameSingular}}Client.Migrate(sqlClient)
+	err = migrate{{.CapsResourceNamePlural}}(sqlClient)
     if err != nil {
         return nil, err
     }
@@ -26,50 +39,127 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 	}, nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	_, err := {{.SmallResourceNameSingular}}Client.Create({{.SmallResourceNameSingular}}Dao.sqlClient, {{.SmallResourceNameSingular}})
-	if err != nil {
-		return err
-	}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+    insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
+    res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
+    if err != nil {
+        var mysqlErr *mysql.MySQLError
+        if errors.As(err, &mysqlErr) {
+            if mysqlErr.Number == 1062 {
+                return nil, sqls.ErrDuplicate
+            }
+        }
+        return nil, err
+    }
+
+    id, err := res.LastInsertId()
+    if err != nil {
+        return nil, err
+    }
+    m.Id = id
 	log.Debugf("{{.SmallResourceNameSingular}} created")
-	return nil
+    return m, nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	if id != {{.SmallResourceNameSingular}}.Id {
-		return errors.New("id and payload don't match")
-	}
-    _, err := {{.SmallResourceNameSingular}}Client.Update({{.SmallResourceNameSingular}}Dao.sqlClient, id, {{.SmallResourceNameSingular}})
-	if err != nil {
-		return err
-	}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
+	if id == 0 {
+        return nil, errors.New("invalid updated ID")
+    }
+    if id != m.Id {
+        return nil, errors.New("id and payload don't match")
+    }
+
+    {{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
+    if err != nil {
+        return nil, err
+    }
+    if {{.SmallResourceNameSingular}} == nil {
+        return nil, sql.ErrNoRows
+    }
+
+    updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
+    res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
+    if err != nil {
+        return nil, err
+    }
+
+    rowsAffected, err := res.RowsAffected()
+    if err != nil {
+        return nil, err
+    }
+
+    if rowsAffected == 0 {
+        return nil, sqls.ErrUpdateFailed
+    }
+
 	log.Debugf("{{.SmallResourceNameSingular}} updated")
-	return nil
+    return m, nil
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
-    err := {{.SmallResourceNameSingular}}Client.Delete({{.SmallResourceNameSingular}}Dao.sqlClient, id)
-	if err != nil {
-		return err
-	}
+	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+    res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(deleteQuery, id)
+    if err != nil {
+        return err
+    }
+
+    rowsAffected, err := res.RowsAffected()
+    if err != nil {
+        return err
+    }
+
+    if rowsAffected == 0 {
+        return sqls.ErrDeleteFailed
+    }
+
 	log.Debugf("{{.SmallResourceNameSingular}} deleted")
 	return nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
-    {{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Client.All({{.SmallResourceNameSingular}}Dao.sqlClient)
-	if err != nil {
-		return {{.SmallResourceNamePlural}}, err
-	}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
+    rows, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Query(selectQuery)
+    if err != nil {
+        return nil, err
+    }
+    defer func(rows *sql.Rows) {
+        _ = rows.Close()
+    }(rows)
+
+    var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
+    for rows.Next() {
+        m := models.{{.CapsResourceNameSingular}} {
+           {{range $k, $v := .Fields}}
+               {{GetCompositeFields $k}}
+           {{end}}
+        }
+        if err = rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+            return nil, err
+        }
+        {{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, &m)
+    }
+    if {{.SmallResourceNamePlural}} == nil {
+        {{.SmallResourceNamePlural}} = []*models.{{.CapsResourceNameSingular}}{}
+    }
 	log.Debugf("{{.SmallResourceNameSingular}} listed")
 	return {{.SmallResourceNamePlural}}, nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Client.Get({{.SmallResourceNameSingular}}Dao.sqlClient, id)
-	if err != nil {
-		return models.{{.CapsResourceNameSingular}}{}, err
-	}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+    row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
+
+    m := models.{{.CapsResourceNameSingular}} {
+       {{range $k, $v := .Fields}}
+           {{GetCompositeFields $k}}
+       {{end}}
+    }
+    if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return nil, sqls.ErrNotExists
+        }
+        return nil, err
+    }
 	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
-	return *{{.SmallResourceNameSingular}}, nil
+    return &m, nil
 }

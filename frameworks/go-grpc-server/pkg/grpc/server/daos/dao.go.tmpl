@@ -1,62 +1,59 @@
 package daos
 
 import (
-	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
+	"errors"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 )
 
 var {{.SmallResourceNamePlural}} = make(map[int64]models.{{.CapsResourceNameSingular}})
 
-type {{.CapsResourceNameSingular}}Dao struct {}
+type {{.CapsResourceNameSingular}}Dao struct {
+}
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	{{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, {{.SmallResourceNameSingular}})
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+
 	return nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
-    if id == "" {
-		return models.{{.CapsResourceNameSingular}}{}, status.Error(codes.InvalidArgument, "id can't be empty")
-	}
-
-	for _, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
-		if {{.SmallResourceNameSingular}}.Id == id {
-			return {{.SmallResourceNameSingular}}, nil
-		}
-	}
-
-	return models.{{.CapsResourceNameSingular}}{}, status.Error(codes.Internal,"something went wrong")
-}
-
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	if id == "" {
-		return status.Error(codes.InvalidArgument, "id can't be empty")
+	if id != {{.SmallResourceNameSingular}}.Id {
+		return errors.New("id and payload don't match")
 	}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
 
-	for idx, value := range {{.SmallResourceNamePlural}} {
-		if value.Id == id {
-			{{.SmallResourceNamePlural}}[idx] = {{.SmallResourceNameSingular}}
-			return nil
-		}
-	}
-	return status.Error(codes.Internal, "something went wrong")
+	return nil
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
-	if id == "" {
-		return status.Error(codes.InvalidArgument, "id can't be empty")
+	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
+		delete({{.SmallResourceNamePlural}}, id)
+		return nil
 	}
-	for idx, {{.SmallResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
-		if {{.SmallResourceNameSingular}}.Id == id {
-			{{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}[:idx], {{.SmallResourceNamePlural}}[idx+1:]...)
-			return nil
-		}
-	}
-	return status.Error(codes.Internal, "something went wrong")
+
+	return errors.New("{{.SmallResourceNameSingular}} not found")
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
-	return {{.SmallResourceNamePlural}}, nil
+	v := make([]models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
+	for _, value := range {{.SmallResourceNamePlural}} {
+		v = append(v, value)
+	}
+
+	return v, nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+	if id == "" {
+		return status.Error(codes.InvalidArgument, "id can't be empty")
+	}
+
+	if {{.SmallResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
+		return {{.SmallResourceNameSingular}}, nil
+	}
+
+	return models.{{.CapsResourceNameSingular}}{}, errors.New("{{.SmallResourceNameSingular}} not found")
 }
