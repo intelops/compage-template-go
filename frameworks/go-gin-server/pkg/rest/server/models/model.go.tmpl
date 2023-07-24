@@ -1,5 +1,17 @@
 package models
 
+{{if .IsGormSQLDB}}
+type {{.CapsResourceNameSingular}} struct {
+    Id int64 `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+{{range $k, $v := .Fields}}
+    {{if eq $k "Id"}}
+    {{else}}
+    {{AddForeignKeyIfCompositeField $k}}
+    {{$k}} {{$v}} `json:"{{ToLowerCamelCase $k}},omitempty"`
+    {{end}}
+{{end}}
+}
+{{else}}
 type {{.CapsResourceNameSingular}} struct {
     Id int64 `json:"id,omitempty"`
 {{range $k, $v := .Fields}}
@@ -9,3 +21,4 @@ type {{.CapsResourceNameSingular}} struct {
     {{end}}
 {{end}}
 }
+{{end}}
