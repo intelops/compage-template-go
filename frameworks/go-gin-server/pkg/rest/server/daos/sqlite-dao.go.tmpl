@@ -56,7 +56,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
     if id == 0 {
-        return nil, errors.New("invalid updated ID")
+        return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
     if id != m.Id {
         return nil, errors.New("id and payload don't match")
