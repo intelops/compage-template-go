@@ -1,10 +1,19 @@
 package sqls
 
 import (
+	"errors"
 	"gorm.io/driver/sqlite"
+    "github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	"gorm.io/gorm"
 	"os"
 	"sync"
+)
+
+var (
+	ErrDuplicate    = errors.New("record already exists")
+	ErrNotExists    = errors.New("row not exists")
+	ErrUpdateFailed = errors.New("update failed")
+	ErrDeleteFailed = errors.New("delete failed")
 )
 
 var o sync.Once
@@ -26,6 +35,16 @@ func InitGORMSQLiteDB() (*SQLiteClient, error) {
 
 		var db *gorm.DB
 		db, err = gorm.Open(sqlite.Open(FileName), &gorm.Config{})
+        if err == nil {
+            serviceName := os.Getenv("SERVICE_NAME")
+            collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+            if len(serviceName) > 0 && len(collectorURL) > 0 {
+                if err := db.Use(otelgorm.NewPlugin()); err != nil {
+                    panic(err)
+                }
+            }
+        }
+
 		sqliteClient = &SQLiteClient{
 			DB: db,
 		}

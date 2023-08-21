@@ -114,14 +114,15 @@ func main() {
 
  {{if .IsRestServer }}
 	router := gin.Default()
-    if len(serviceName) > 0 && len(collectorURL) > 0 {
-        // add opentel
-        cleanup := initTracer()
-        defer func(func(context.Context) error) {
-            _ = cleanup(context.Background())
-        }(cleanup)
-        router.Use(otelgin.Middleware(serviceName))
-    }
+    var cleanup func(context.Context) error
+	if len(serviceName) > 0 && len(collectorURL) > 0 {
+		// add opentel
+		cleanup = initTracer()
+		router.Use(otelgin.Middleware(serviceName))
+	}
+	defer func(func(context.Context) error) {
+		_ = cleanup(context.Background())
+	}(cleanup)
 
     // add actuator
 	addActuator(router)
@@ -237,7 +238,7 @@ func initTracer() func(context.Context) error {
 	restResources, err := resource.New(
 		context.Background(),
 		resource.WithAttributes(
-			attribute.String("services.name", serviceName),
+			attribute.String("service.name", serviceName),
 			attribute.String("library.language", "go"),
 		),
 	)
