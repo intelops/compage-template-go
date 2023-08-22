@@ -47,6 +47,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     var {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}
     if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).First(&{{.SmallResourceNameSingular}}).Error; err != nil {
         log.Debugf("failed to find {{.SmallResourceNameSingular}} for update: %v", err)
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, sqls.ErrNotExists
+        }
         return nil, err
     }
 
@@ -85,6 +88,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
     var m *models.{{.CapsResourceNameSingular}}
     if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).First(&m).Error; err != nil {
         log.Debugf("failed to get {{.SmallResourceNameSingular}}: %v", err)
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, sqls.ErrNotExists
+        }
         return nil, err
     }
     log.Debugf("{{.SmallResourceNameSingular}} retrieved")

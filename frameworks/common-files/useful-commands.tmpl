@@ -33,37 +33,58 @@
     {{range $i, $v := .RestResources}}
 # Curl commands for REST Server resource {{$v.CapsResourceNameSingular}}
 # Post
+```
 curl -X POST -H "Content-Type: application/json" \
 -d '{{$v.ResourcePostBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
+```
 
 # Get
+```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
-
+```
 # Put
+```
 curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
+```
 
 # Put
 ### wrong id passed in param
+```
 curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/1234
-
+```
 # Get  (retrieve specific {{$v.CapsResourceNameSingular}})
+```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
-
+```
 # Delete
+```
 curl -X DELETE -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
-
+```
     {{end}}
 
+# Run mysql server in docker on local
+```
+docker run --detach --name=mysql --env="MYSQL_ROOT_PASSWORD=password" --publish 3306:3306 mysql/mysql-server:latest
+```
 # when mysql throws error about server connection, fire below commands
-# CREATE USER 'root'@'%' IDENTIFIED BY 'password';
-# GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-
+#
+```
+error occurred: Error 1130: Host '172.17.0.1' is not allowed to connect to this MySQL server
+```
+# More details here - https://stackoverflow.com/a/19101356/3751443
+```
+docker exec -ti mysql bash
+mysql -u root -p ### you will be prompted for password
+SELECT host FROM mysql.user WHERE User = 'root';
+CREATE USER 'root'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+```
 {{end}}

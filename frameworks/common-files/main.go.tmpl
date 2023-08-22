@@ -8,6 +8,8 @@ import (
         grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
         "google.golang.org/grpc"
         "google.golang.org/grpc/reflection"
+	    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/config"
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
         "context"
         restcontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
@@ -25,7 +27,11 @@ import (
         "google.golang.org/grpc/credentials"
     {{else if .IsGrpcServer }}
         "net"
+        "os"
         log "github.com/sirupsen/logrus"
+        "context"
+	    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/config"
+	    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
         pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
         grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
@@ -70,25 +76,43 @@ var (
 
 func main() {
  {{if .IsGrpcServer }}
+    var (
+        serviceName  = os.Getenv("SERVICE_NAME")
+        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+        insecure     = os.Getenv("INSECURE_MODE")
+    )
+
+    if len(serviceName) > 0 && len(collectorURL) > 0 {
+        tp := config.Init(serviceName, collectorURL, insecure)
+        defer func() {
+            if err := tp.Shutdown(context.Background()); err != nil {
+                log.Printf("Error shutting down tracer provider: %v", err)
+            }
+        }()
+    }
+
 	// Set up the TCP listener
 	addr := net.JoinHostPort(host, port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Errorf("error while starting TCP listener: %s", err)
-		return
+		os.Exit(1)
 	}
 
     log.Printf("TCP listener started at port: %s", port)
 
 	// Create a new gRPC server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+        grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
+        grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
+	)
 
  {{range $i, $v := .GrpcResources}}
 	// Create the {{$v.CapsResourceNameSingular}} server
 	{{$v.SmallResourceNameSingular}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
     if err != nil {
         log.Errorf("error while creating {{$v.SmallResourceNameSingular}}Server: %s", err)
-        return
+        os.Exit(1)
     }
 	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
 	pb.Register{{$v.CapsResourceNameSingular}}ServiceServer(grpcServer, {{$v.SmallResourceNameSingular}}Server)
@@ -101,27 +125,28 @@ func main() {
         // Start serving gRPC requests
         if err = grpcServer.Serve(lis); err != nil {
             log.Errorf("error serving gRPC: %s", err)
-            return
+            os.Exit(1)
         }
     }()
  {{else if .IsGrpcServer}}
     // Start serving gRPC requests
     if err := grpcServer.Serve(lis); err != nil {
         log.Errorf("error serving gRPC: %s", err)
-        return
+        os.Exit(1)
     }
  {{end}}
 
  {{if .IsRestServer }}
 	router := gin.Default()
-    if len(serviceName) > 0 && len(collectorURL) > 0 {
-        // add opentel
-        cleanup := initTracer()
-        defer func(func(context.Context) error) {
-            _ = cleanup(context.Background())
-        }(cleanup)
-        router.Use(otelgin.Middleware(serviceName))
-    }
+    var cleanup func(context.Context) error
+	if len(serviceName) > 0 && len(collectorURL) > 0 {
+		// add opentel
+		cleanup = initTracer()
+		router.Use(otelgin.Middleware(serviceName))
+	}
+	defer func(func(context.Context) error) {
+		_ = cleanup(context.Background())
+	}(cleanup)
 
     // add actuator
 	addActuator(router)
@@ -132,7 +157,7 @@ func main() {
         {{$v.SmallResourceNameSingular}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
         if err != nil {
             log.Errorf("error occurred: %s", err)
-            return
+            os.Exit(1)
         }
     {{end}}
     v1 := router.Group("/v1")
@@ -153,7 +178,7 @@ func main() {
 	log.Println("Server started")
 	if err = router.Run(Port); err != nil {
         log.Errorf("error occurred: %s", err)
-		return
+		os.Exit(1)
 	}
  {{end}}
  {{if .HasRestClients}}
@@ -232,17 +257,18 @@ func initTracer() func(context.Context) error {
 
 	if err != nil {
         log.Errorf("error occurred: %s", err)
-        return nil
+        os.Exit(1)
 	}
 	restResources, err := resource.New(
 		context.Background(),
 		resource.WithAttributes(
-			attribute.String("services.name", serviceName),
+			attribute.String("service.name", serviceName),
 			attribute.String("library.language", "go"),
 		),
 	)
 	if err != nil {
-		log.Printf("could not set restResources: %s", err)
+		log.Errorf("could not set restResources: %s", err)
+        os.Exit(1)
 	}
 
 	otel.SetTracerProvider(

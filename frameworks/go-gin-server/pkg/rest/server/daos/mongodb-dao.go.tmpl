@@ -93,7 +93,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
 	}
 	deleteResult, err := {{.SmallResourceNameSingular}}Dao.collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			// This error means your query did not match any documents.
 			return nosqls.ErrNotExists
 		}
@@ -141,7 +141,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 		{Key: "_id", Value: objectID},
 		}
 	if err = {{.SmallResourceNameSingular}}Dao.collection.FindOne(context.TODO(), filter).Decode(&{{.SmallResourceNameSingular}}); err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			// This error means your query did not match any documents.
 			return &models.{{.CapsResourceNameSingular}}{}, nosqls.ErrNotExists
 		}
