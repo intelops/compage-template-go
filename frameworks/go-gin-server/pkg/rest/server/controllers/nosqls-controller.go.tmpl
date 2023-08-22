@@ -2,10 +2,15 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/nosqls"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/services"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"errors"
+	"os"
+    "go.opentelemetry.io/otel/trace"
+    "go.opentelemetry.io/otel/attribute"
 )
 
 type {{.CapsResourceNameSingular}}Controller struct {
@@ -53,6 +58,14 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	// trigger {{.SmallResourceNameSingular}} update
 	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(context.Param("id"), &input); err != nil {
 		log.Error(err)
+		if errors.Is(err, nosqls.ErrNotExists) {
+            context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+            return
+        }
+        if errors.Is(err, nosqls.ErrInvalidObjectID) {
+            context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -65,9 +78,24 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(context.Param("id"))
 	if err != nil {
 		log.Error(err)
+		if errors.Is(err, nosqls.ErrNotExists) {
+            context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+            return
+        }
+        if errors.Is(err, nosqls.ErrInvalidObjectID) {
+            context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+    serviceName := os.Getenv("SERVICE_NAME")
+    collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    if len(serviceName) > 0 && len(collectorURL) > 0 {
+        // get the current span by the request context
+        currentSpan := trace.SpanFromContext(context.Request.Context())
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", {{.SmallResourceNameSingular}}.ID))
+    }
 
 	context.JSON(http.StatusOK, {{.SmallResourceNameSingular}})
 }
@@ -76,6 +104,14 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	// trigger {{.SmallResourceNameSingular}} deletion
 	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(context.Param("id")); err != nil {
 		log.Error(err)
+        if errors.Is(err, nosqls.ErrNotExists) {
+            context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+            return
+        }
+        if errors.Is(err, nosqls.ErrInvalidObjectID) {
+            context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

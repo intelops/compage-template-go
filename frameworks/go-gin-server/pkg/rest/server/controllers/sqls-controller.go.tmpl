@@ -65,7 +65,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	// trigger {{.SmallResourceNameSingular}} update
 	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
 		log.Error(err)
-        if err == sqls.ErrNotExists {
+        if errors.Is(err, sqls.ErrNotExists) {
             context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
             return
         }
@@ -88,7 +88,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
 	if err != nil {
 		log.Error(err)
-		if err == sqls.ErrNotExists {
+		if errors.Is(err, sqls.ErrNotExists) {
             context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
             return
         }
