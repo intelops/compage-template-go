@@ -4,6 +4,7 @@ import (
 	"database/sql"
     "github.com/uptrace/opentelemetry-go-extra/otelsql"
     semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
+    log "github.com/sirupsen/logrus"
 	"errors"
 	"os"
 	"time"
@@ -53,7 +54,8 @@ func InitMySQLDB() (*MySQLClient, error) {
             db, err = sql.Open("mysql", dataSource)
         }
         if err != nil {
-            panic(err)
+            log.Debugf("unable to connect to database, %v", err)
+            os.Exit(1)
         }
         db.SetConnMaxLifetime(time.Minute * 3)
         db.SetMaxOpenConns(10)

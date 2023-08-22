@@ -1,13 +1,22 @@
 package sqls
 
 import (
+	"errors"
 	"os"
 	"fmt"
 	"sync"
 
+    "github.com/uptrace/opentelemetry-go-extra/otelgorm"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrDuplicate    = errors.New("record already exists")
+	ErrNotExists    = errors.New("row not exists")
+	ErrUpdateFailed = errors.New("update failed")
+	ErrDeleteFailed = errors.New("delete failed")
 )
 
 var (
@@ -48,6 +57,17 @@ func InitGormMySQLDB() (*MySQLClient, error) {
         if err != nil {
             log.Debugf("database connection error, %v", err)
 			os.Exit(1)
+        }
+
+        serviceName := os.Getenv("SERVICE_NAME")
+        collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+        if len(serviceName) > 0 && len(collectorURL) > 0 {
+            if err := db.Use(otelgorm.NewPlugin()); err != nil {
+                if err := db.Use(otelgorm.NewPlugin()); err != nil {
+                    log.Debugf("unable to attach opentel plugin error, %v", err)
+                    os.Exit(1)
+                }
+             }
         }
 
         mySQLClient = &MySQLClient{
