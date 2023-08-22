@@ -53,19 +53,20 @@ func InitGormMySQLDB() (*MySQLClient, error) {
 
         db, err = gorm.Open(mysql.New(mySQLConfigs), &gorm.Config{})
 
-        if err == nil {
-            serviceName := os.Getenv("SERVICE_NAME")
-            collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-            if len(serviceName) > 0 && len(collectorURL) > 0 {
-                if err := db.Use(otelgorm.NewPlugin()); err != nil {
-                    panic(err)
-                }
-            }
-        }
-
         if err != nil {
             log.Debugf("database connection error, %v", err)
 			os.Exit(1)
+        }
+
+        serviceName := os.Getenv("SERVICE_NAME")
+        collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+        if len(serviceName) > 0 && len(collectorURL) > 0 {
+            if err := db.Use(otelgorm.NewPlugin()); err != nil {
+                if err := db.Use(otelgorm.NewPlugin()); err != nil {
+                    log.Debugf("unable to attach opentel plugin error, %v", err)
+                    os.Exit(1)
+                }
+             }
         }
 
         mySQLClient = &MySQLClient{
