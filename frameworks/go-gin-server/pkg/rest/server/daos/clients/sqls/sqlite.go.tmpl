@@ -33,25 +33,27 @@ func InitSqliteDB() (*SQLiteClient, error) {
 	o.Do(func() {
 		if _, err = os.Stat(FileName); err == nil {
 			err = os.Remove(FileName)
-		}
-
-        if err != nil {
-            var db *sql.DB
-            serviceName := os.Getenv("SERVICE_NAME")
-            collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-            if len(serviceName) > 0 && len(collectorURL) > 0 {
-                // add opentel
-                db, err = otelsql.Open("sqlite3", FileName, otelsql.WithAttributes(semconv.DBSystemSqlite))
-            } else {
-                db, err = sql.Open("sqlite3", FileName)
-            }
             if err != nil {
-                log.Debugf("database connection error, %v", err)
+                log.Debugf("unable to remove database file, %v", err)
                 os.Exit(1)
             }
-            sqliteClient = &SQLiteClient{
-                DB: db,
-            }
+		}
+
+        var db *sql.DB
+        serviceName := os.Getenv("SERVICE_NAME")
+        collectorURL := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+        if len(serviceName) > 0 && len(collectorURL) > 0 {
+            // add opentel
+            db, err = otelsql.Open("sqlite3", FileName, otelsql.WithAttributes(semconv.DBSystemSqlite))
+        } else {
+            db, err = sql.Open("sqlite3", FileName)
+        }
+        if err != nil {
+            log.Debugf("database connection error, %v", err)
+            os.Exit(1)
+        }
+        sqliteClient = &SQLiteClient{
+            DB: db,
         }
 
 	})

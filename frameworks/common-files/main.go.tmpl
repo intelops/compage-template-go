@@ -9,22 +9,15 @@ import (
         "google.golang.org/grpc"
         "google.golang.org/grpc/reflection"
 	    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/config"
+        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
         "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-
+    	sdktrace "go.opentelemetry.io/otel/sdk/trace"
         "context"
         restcontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
         "github.com/gin-gonic/gin"
         "github.com/prometheus/client_golang/prometheus/promhttp"
         "github.com/sinhashubham95/go-actuator"
         log "github.com/sirupsen/logrus"
-        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-        "google.golang.org/grpc/credentials"
     {{else if .IsGrpcServer }}
         "net"
         "os"
@@ -35,25 +28,21 @@ import (
 
         pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
         grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
-
+    	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+        "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
         "google.golang.org/grpc"
-        "google.golang.org/grpc/reflection"
 
     {{else if .IsRestServer }}
         "context"
+    	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+        "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/config"
         restcontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
         "github.com/gin-gonic/gin"
         "github.com/prometheus/client_golang/prometheus/promhttp"
         "github.com/sinhashubham95/go-actuator"
-        log "github.com/sirupsen/logrus"
         "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-        "google.golang.org/grpc/credentials"
+        log "github.com/sirupsen/logrus"
         "os"
 {{end}}
 
@@ -73,29 +62,34 @@ var (
 )
 {{end}}
 
+var (
+    serviceName  = os.Getenv("SERVICE_NAME")
+    collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    insecure     = os.Getenv("INSECURE_MODE")
+)
 
 func main() {
  {{if .IsGrpcServer }}
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-
-    if len(serviceName) > 0 && len(collectorURL) > 0 {
-        tp := config.Init(serviceName, collectorURL, insecure)
-        defer func() {
-            if err := tp.Shutdown(context.Background()); err != nil {
+    // grpc server configuration
+    // Initialize the exporter
+    var grpcTraceProvider *sdktrace.TracerProvider
+	if len(serviceName) > 0 && len(collectorURL) > 0 {
+		// add opentel
+		grpcTraceProvider = config.InitGrpcTracer(serviceName, collectorURL, insecure)
+	}
+    defer func() {
+        if grpcTraceProvider != nil {
+            if err := grpcTraceProvider.Shutdown(context.Background()); err != nil {
                 log.Printf("Error shutting down tracer provider: %v", err)
             }
-        }()
-    }
+        }
+    }()
 
 	// Set up the TCP listener
 	addr := net.JoinHostPort(host, port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Errorf("error while starting TCP listener: %s", err)
+		log.Errorf("error while starting TCP listener: %v", err)
 		os.Exit(1)
 	}
 
@@ -111,7 +105,7 @@ func main() {
 	// Create the {{$v.CapsResourceNameSingular}} server
 	{{$v.SmallResourceNameSingular}}Server, err := grpccontrollers.New{{$v.CapsResourceNameSingular}}Server()
     if err != nil {
-        log.Errorf("error while creating {{$v.SmallResourceNameSingular}}Server: %s", err)
+        log.Errorf("error while creating {{$v.SmallResourceNameSingular}}Server: %v", err)
         os.Exit(1)
     }
 	// Register the {{$v.CapsResourceNameSingular}} server with the gRPC server
@@ -124,30 +118,34 @@ func main() {
     go func() {
         // Start serving gRPC requests
         if err = grpcServer.Serve(lis); err != nil {
-            log.Errorf("error serving gRPC: %s", err)
+            log.Errorf("error serving gRPC: %v", err)
             os.Exit(1)
         }
     }()
  {{else if .IsGrpcServer}}
     // Start serving gRPC requests
     if err := grpcServer.Serve(lis); err != nil {
-        log.Errorf("error serving gRPC: %s", err)
+        log.Errorf("error serving gRPC: %v", err)
         os.Exit(1)
     }
  {{end}}
 
  {{if .IsRestServer }}
+    // rest server configuration
 	router := gin.Default()
-    var cleanup func(context.Context) error
+    var restTraceProvider *sdktrace.TracerProvider
 	if len(serviceName) > 0 && len(collectorURL) > 0 {
 		// add opentel
-		cleanup = initTracer()
+		restTraceProvider = config.InitRestTracer(serviceName, collectorURL, insecure)
 		router.Use(otelgin.Middleware(serviceName))
 	}
-	defer func(func(context.Context) error) {
-		_ = cleanup(context.Background())
-	}(cleanup)
-
+    defer func() {
+        if restTraceProvider != nil {
+            if err := restTraceProvider.Shutdown(context.Background()); err != nil {
+                log.Printf("Error shutting down tracer provider: %v", err)
+            }
+        }
+    }()
     // add actuator
 	addActuator(router)
 	// add prometheus
@@ -156,7 +154,7 @@ func main() {
     {{range $i, $v := .RestResources}}
         {{$v.SmallResourceNameSingular}}Controller, err := restcontrollers.New{{$v.CapsResourceNameSingular}}Controller()
         if err != nil {
-            log.Errorf("error occurred: %s", err)
+            log.Errorf("error occurred: %v", err)
             os.Exit(1)
         }
     {{end}}
@@ -177,18 +175,19 @@ func main() {
 	Port := ":{{.RestServerPort}}"
 	log.Println("Server started")
 	if err = router.Run(Port); err != nil {
-        log.Errorf("error occurred: %s", err)
+        log.Errorf("error occurred: %v", err)
 		os.Exit(1)
 	}
  {{end}}
  {{if .HasRestClients}}
+    // this will not be called as the control won't reach here.
     // call external services here if the HasRestClients value is true
     // (that means this repo is a client to external service(s)
     var err0 error
     {{range $i, $v := .RestClients}}
         b{{$v.SourceNodeID}}, err0 := client.Execute{{$v.SourceNodeID}}()
         if err0!=nil {
-            log.Printf("error occurred: %s", err0)
+            log.Printf("error occurred: %v", err0)
             return
         }
         log.Printf("response received: %s", string(b{{$v.SourceNodeID}}))
@@ -202,12 +201,6 @@ func main() {
 }
 
 {{if .IsRestServer }}
-
-var (
-	serviceName  = os.Getenv("SERVICE_NAME")
-	collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	insecure     = os.Getenv("INSECURE_MODE")
-)
 
 func prometheusHandler() gin.HandlerFunc {
 	h := promhttp.Handler()
@@ -239,46 +232,6 @@ func addActuator(router *gin.Engine) {
 		actuatorHandler(ctx.Writer, ctx.Request)
 	}
 	router.GET("/actuator/*endpoint", ginActuatorHandler)
-}
-
-func initTracer() func(context.Context) error {
-	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-	if len(insecure) > 0 {
-		secureOption = otlptracegrpc.WithInsecure()
-	}
-
-	exporter, err := otlptrace.New(
-		context.Background(),
-		otlptracegrpc.NewClient(
-			secureOption,
-			otlptracegrpc.WithEndpoint(collectorURL),
-		),
-	)
-
-	if err != nil {
-        log.Errorf("error occurred: %s", err)
-        os.Exit(1)
-	}
-	restResources, err := resource.New(
-		context.Background(),
-		resource.WithAttributes(
-			attribute.String("service.name", serviceName),
-			attribute.String("library.language", "go"),
-		),
-	)
-	if err != nil {
-		log.Errorf("could not set restResources: %s", err)
-        os.Exit(1)
-	}
-
-	otel.SetTracerProvider(
-		sdktrace.NewTracerProvider(
-			sdktrace.WithSampler(sdktrace.AlwaysSample()),
-			sdktrace.WithBatcher(exporter),
-			sdktrace.WithResource(restResources),
-		),
-	)
-	return exporter.Shutdown
 }
 
 func init() {
