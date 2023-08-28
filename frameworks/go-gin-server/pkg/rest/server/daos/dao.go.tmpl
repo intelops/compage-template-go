@@ -5,24 +5,29 @@ import (
 	"github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
 )
 
-var {{.SmallResourceNamePlural}} = make(map[int64]models.{{.CapsResourceNameSingular}})
+var {{.SmallResourceNamePlural}} = make(map[int64]*models.{{.CapsResourceNameSingular}})
 
 type {{.CapsResourceNameSingular}}Dao struct {
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
-
-	return nil
+func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
+	return &{{.CapsResourceNameSingular}}Dao{
+	}, nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} models.{{.CapsResourceNameSingular}}) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+
+	return {{.SmallResourceNameSingular}}, nil
+}
+
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id != {{.SmallResourceNameSingular}}.Id {
-		return errors.New("id and payload don't match")
+		return nil, errors.New("id and payload don't match")
 	}
 	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
 
-	return nil
+	return {{.SmallResourceNameSingular}}, nil
 }
 
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
@@ -34,8 +39,8 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
 	return errors.New("{{.SmallResourceNameSingular}} not found")
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]models.{{.CapsResourceNameSingular}}, error) {
-	v := make([]models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+	v := make([]*models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
 	for _, value := range {{.SmallResourceNamePlural}} {
 		v = append(v, value)
 	}
@@ -43,10 +48,10 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 	return v, nil
 }
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
 	if {{.SmallResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		return {{.SmallResourceNameSingular}}, nil
 	}
 
-	return models.{{.CapsResourceNameSingular}}{}, errors.New("{{.SmallResourceNameSingular}} not found")
+	return &models.{{.CapsResourceNameSingular}}{}, errors.New("{{.SmallResourceNameSingular}} not found")
 }
