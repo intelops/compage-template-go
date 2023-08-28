@@ -24,12 +24,11 @@ import (
         log "github.com/sirupsen/logrus"
         "context"
 	    "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/config"
-	    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+        "google.golang.org/grpc/reflection"
 
         pb "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
         grpccontrollers "github.com/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
     	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-        "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
         "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
         "google.golang.org/grpc"
 
