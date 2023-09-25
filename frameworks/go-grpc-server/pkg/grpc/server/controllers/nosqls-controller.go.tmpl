@@ -7,9 +7,9 @@ import (
     "os"
 
 
-	pb "{{.GitPlatformUrl}}/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/gen/api/v1"
-	"{{.GitPlatformUrl}}/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
-	"{{.GitPlatformUrl}}/{{.UserName}}/{{.RepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
+	pb "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
+	"{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
+	"{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
 )
 
 type {{.CapsResourceNameSingular}}Server struct {
