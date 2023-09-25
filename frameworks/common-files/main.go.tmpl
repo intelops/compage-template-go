@@ -4,16 +4,16 @@ import (
 {{if and .IsRestServer .IsGrpcServer}}
         "net"
         "os"
-        pb "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
-        grpccontrollers "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
+        pb "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
+        grpccontrollers "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
         "google.golang.org/grpc"
         "google.golang.org/grpc/reflection"
-	    "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
+	    "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
         "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
         "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
     	sdktrace "go.opentelemetry.io/otel/sdk/trace"
         "context"
-        restcontrollers "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+        restcontrollers "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
         "github.com/gin-gonic/gin"
         "github.com/prometheus/client_golang/prometheus/promhttp"
         "github.com/sinhashubham95/go-actuator"
@@ -23,11 +23,11 @@ import (
         "os"
         log "github.com/sirupsen/logrus"
         "context"
-	    "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
+	    "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
         "google.golang.org/grpc/reflection"
 
-        pb "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
-        grpccontrollers "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
+        pb "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
+        grpccontrollers "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/controllers"
     	sdktrace "go.opentelemetry.io/otel/sdk/trace"
         "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
         "google.golang.org/grpc"
@@ -35,8 +35,8 @@ import (
     {{else if .IsRestServer }}
         "context"
     	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-        "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
-        restcontrollers "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
+        "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/config"
+        restcontrollers "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/controllers"
         "github.com/gin-gonic/gin"
         "github.com/prometheus/client_golang/prometheus/promhttp"
         "github.com/sinhashubham95/go-actuator"
@@ -46,10 +46,10 @@ import (
 {{end}}
 
 {{if .HasRestClients}}
-    "{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/client"
+    "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/client"
 {{end}}
 {{if .HasGrpcClients}}
-	"{{.GitPlatformUrl}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/client"
+	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/client"
 {{end}}
 )
 
