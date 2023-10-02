@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{.NodeName}}
-          image: {{.UserName}}/{{.RepositoryName}}/{{.NodeName}}
+          image: {{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}
           imagePullPolicy: Always
         {{if .IsRestServer }}
           env:
