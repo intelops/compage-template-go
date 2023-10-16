@@ -28,6 +28,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 	}, nil
 }
 
+{{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	// create a document for given {{.SmallResourceNameSingular}}
 	insertOneResult, err := {{.SmallResourceNameSingular}}Dao.collection.InsertOne(context.TODO(), {{.SmallResourceNameSingular}})
@@ -40,7 +41,59 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
 	log.Debugf("{{.SmallResourceNameSingular}} created")
 	return {{.SmallResourceNameSingular}}, nil
 }
+{{ end }}
 
+
+{{ if .IsRESTListAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+	filters := bson.D{}
+	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Dao.collection.Find(context.TODO(), filters)
+	if err != nil {
+		return nil, err
+	}
+	var {{.SmallResourceNameSingular}}List []*models.{{.CapsResourceNameSingular}}
+	for {{.SmallResourceNamePlural}}.Next(context.TODO()) {
+		var {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}
+		if err = {{.SmallResourceNamePlural}}.Decode(&{{.SmallResourceNameSingular}}); err != nil {
+			log.Debugf("decode {{.SmallResourceNameSingular}} failed: %v", err)
+			return nil, err
+		}
+		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}})
+	}
+	if {{.SmallResourceNameSingular}}List == nil {
+		return []*models.{{.CapsResourceNameSingular}}{}, nil
+	}
+
+	log.Debugf("{{.SmallResourceNameSingular}} listed")
+	return {{.SmallResourceNameSingular}}List, nil
+}
+{{ end }}
+
+{{ if .IsRESTGetAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
+	var {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return &models.{{.CapsResourceNameSingular}}{}, nosqls.ErrInvalidObjectID
+	}
+	filter := bson.D{
+		{Key: "_id", Value: objectID},
+		}
+	if err = {{.SmallResourceNameSingular}}Dao.collection.FindOne(context.TODO(), filter).Decode(&{{.SmallResourceNameSingular}}); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			// This error means your query did not match any documents.
+			return &models.{{.CapsResourceNameSingular}}{}, nosqls.ErrNotExists
+		}
+		log.Debugf("decode {{.SmallResourceNameSingular}} failed: %v", err)
+		return nil, err
+	}
+
+	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+	return {{.SmallResourceNameSingular}}, nil
+}
+{{ end }}
+
+{{ if .IsRESTUpdateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id string, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id != {{.SmallResourceNameSingular}}.ID {
 		log.Debugf("id(%s) and payload(%s) don't match", id, {{.SmallResourceNameSingular}}.ID)
@@ -82,7 +135,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 	log.Debugf("{{.SmallResourceNameSingular}} updated")
 	return {{.SmallResourceNameSingular}},nil
 }
+{{ end }}
 
+{{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id string) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -107,48 +162,4 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
 	log.Debugf("{{.SmallResourceNameSingular}} deleted")
 	return nil
 }
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
-	filters := bson.D{}
-	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Dao.collection.Find(context.TODO(), filters)
-	if err != nil {
-		return nil, err
-	}
-	var {{.SmallResourceNameSingular}}List []*models.{{.CapsResourceNameSingular}}
-	for {{.SmallResourceNamePlural}}.Next(context.TODO()) {
-		var {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}
-		if err = {{.SmallResourceNamePlural}}.Decode(&{{.SmallResourceNameSingular}}); err != nil {
-			log.Debugf("decode {{.SmallResourceNameSingular}} failed: %v", err)
-			return nil, err
-		}
-		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}})
-	}
-	if {{.SmallResourceNameSingular}}List == nil {
-		return []*models.{{.CapsResourceNameSingular}}{}, nil
-	}
-
-	log.Debugf("{{.SmallResourceNameSingular}} listed")
-	return {{.SmallResourceNameSingular}}List, nil
-}
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
-	var {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return &models.{{.CapsResourceNameSingular}}{}, nosqls.ErrInvalidObjectID
-	}
-	filter := bson.D{
-		{Key: "_id", Value: objectID},
-		}
-	if err = {{.SmallResourceNameSingular}}Dao.collection.FindOne(context.TODO(), filter).Decode(&{{.SmallResourceNameSingular}}); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			// This error means your query did not match any documents.
-			return &models.{{.CapsResourceNameSingular}}{}, nosqls.ErrNotExists
-		}
-		log.Debugf("decode {{.SmallResourceNameSingular}} failed: %v", err)
-		return nil, err
-	}
-
-	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
-	return {{.SmallResourceNameSingular}}, nil
-}
+{{ end }}
