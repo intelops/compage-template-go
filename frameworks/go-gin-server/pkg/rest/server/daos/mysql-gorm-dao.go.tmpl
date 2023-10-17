@@ -67,7 +67,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 }
 {{ end }}
 
-{{ if .IsRESTUpdateAllowed }}
+{{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
     if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")

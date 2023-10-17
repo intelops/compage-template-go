@@ -37,7 +37,7 @@ func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Servic
 }
 {{ end }}
 
-{{ if .IsRESTUpdateAllowed }}
+{{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
 	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}})
 }

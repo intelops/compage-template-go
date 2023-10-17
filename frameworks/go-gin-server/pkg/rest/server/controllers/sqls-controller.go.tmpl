@@ -97,7 +97,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 }
 {{ end }}
 
-{{ if .IsRESTUpdateAllowed }}
+{{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 	// validate input
 	var input models.{{.CapsResourceNameSingular}}
@@ -125,7 +125,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	context.JSON(http.StatusNoContent)
+	context.JSON(http.StatusNoContent, gin.H{})
 }
 {{ end }}
 
@@ -145,7 +145,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	context.JSON(http.StatusNoContent)
+	context.JSON(http.StatusNoContent, gin.H{})
 }
 {{ end }}
 

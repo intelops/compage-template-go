@@ -32,7 +32,7 @@
 {{if .IsRestServer }}
 {{range $i, $v := .RestResources}}
 # Curl commands for REST Server resource {{$v.CapsResourceNameSingular}}
-{{ if $.IsRESTCreateAllowed }}
+{{ if $v.IsRESTCreateAllowed }}
 # Post
 ```
 curl -X POST -H "Content-Type: application/json" \
@@ -40,14 +40,14 @@ curl -X POST -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
 ```
 {{ end }}
-{{ if $.IsRESTListAllowed }}
+{{ if $v.IsRESTListAllowed }}
 # Get
 ```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
 ```
 {{ end }}
-{{ if $.IsRESTUpdateAllowed }}
+{{ if $v.IsRESTPutAllowed }}
 # Put
 ```
 curl -X PUT -H "Content-Type: application/json" \
@@ -62,14 +62,14 @@ curl -X PUT -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/1234
 ```
 {{ end }}
-{{ if $.IsRESTGetAllowed }}
+{{ if $v.IsRESTGetAllowed }}
 # Get  (retrieve specific {{$v.CapsResourceNameSingular}})
 ```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
 ```
 {{ end }}
-{{ if $.IsRESTDeleteAllowed }}
+{{ if $v.IsRESTDeleteAllowed }}
 # Delete
 ```
 curl -X DELETE -H "Content-Type: application/json" \
