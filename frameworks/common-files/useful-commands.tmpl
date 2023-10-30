@@ -30,27 +30,30 @@
 {{end}}
 
 {{if .IsRestServer }}
-    {{range $i, $v := .RestResources}}
+{{range $i, $v := .RestResources}}
 # Curl commands for REST Server resource {{$v.CapsResourceNameSingular}}
+{{ if $v.IsRESTCreateAllowed }}
 # Post
 ```
 curl -X POST -H "Content-Type: application/json" \
 -d '{{$v.ResourcePostBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
 ```
-
+{{ end }}
+{{ if $v.IsRESTListAllowed }}
 # Get
 ```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
 ```
+{{ end }}
+{{ if $v.IsRESTPutAllowed }}
 # Put
 ```
 curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
 ```
-
 # Put
 ### wrong id passed in param
 ```
@@ -58,17 +61,22 @@ curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/1234
 ```
+{{ end }}
+{{ if $v.IsRESTGetAllowed }}
 # Get  (retrieve specific {{$v.CapsResourceNameSingular}})
 ```
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
 ```
+{{ end }}
+{{ if $v.IsRESTDeleteAllowed }}
 # Delete
 ```
 curl -X DELETE -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
 ```
-    {{end}}
+{{ end }}
+{{ end }}
 
 # Run mysql server in docker on local
 ```

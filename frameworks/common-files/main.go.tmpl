@@ -160,14 +160,30 @@ func main() {
     v1 := router.Group("/v1")
     {
         {{range $i, $v := .RestResources}}
-            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Fetch{{$v.CapsResourceNameSingular}})
+            {{ if $v.IsRESTCreateAllowed }}
             v1.POST("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Create{{$v.CapsResourceNameSingular}})
-            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Update{{$v.CapsResourceNameSingular}})
-            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Delete{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTListAllowed }}
             v1.GET("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.List{{$v.CapsResourceNamePlural}})
+            {{ end }}
+            {{ if $v.IsRESTGetAllowed }}
+            v1.GET("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Fetch{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTPutAllowed }}
+            v1.PUT("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Update{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTDeleteAllowed }}
+            v1.DELETE("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Delete{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTPatchAllowed }}
             v1.PATCH("/{{$v.SmallResourceNamePlural}}/:id", {{$v.SmallResourceNameSingular}}Controller.Patch{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTHeadAllowed }}
             v1.HEAD("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Head{{$v.CapsResourceNameSingular}})
+            {{ end }}
+            {{ if $v.IsRESTOptionsAllowed }}
             v1.OPTIONS("/{{$v.SmallResourceNamePlural}}", {{$v.SmallResourceNameSingular}}Controller.Options{{$v.CapsResourceNameSingular}})
+            {{ end }}
         {{end}}
     }
 

@@ -19,22 +19,32 @@ func New{{.CapsResourceNameSingular}}Service() (*{{.CapsResourceNameSingular}}Se
 	}, nil
 }
 
+{{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
 	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}})
 }
+{{ end }}
 
-func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
-	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}})
-}
-
-func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Delete{{.CapsResourceNameSingular}}(id int64) error {
-	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Delete{{.CapsResourceNameSingular}}(id)
-}
-
+{{ if .IsRESTListAllowed }}
 func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
 	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.List{{.CapsResourceNamePlural}}()
 }
+{{ end }}
 
+{{ if .IsRESTGetAllowed }}
 func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
 	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
 }
+{{ end }}
+
+{{ if .IsRESTPutAllowed }}
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Update{{.CapsResourceNameSingular}}(id, {{.SmallResourceNameSingular}})
+}
+{{ end }}
+
+{{ if .IsRESTDeleteAllowed }}
+func ({{.SmallResourceNameSingular}}Service *{{.CapsResourceNameSingular}}Service) Delete{{.CapsResourceNameSingular}}(id int64) error {
+	return {{.SmallResourceNameSingular}}Service.{{.SmallResourceNameSingular}}Dao.Delete{{.CapsResourceNameSingular}}(id)
+}
+{{ end }}

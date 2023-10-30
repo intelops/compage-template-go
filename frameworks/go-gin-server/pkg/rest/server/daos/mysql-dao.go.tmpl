@@ -39,6 +39,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 	}, nil
 }
 
+{{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
     insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
@@ -60,7 +61,61 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
 	log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil
 }
+{{ end }}
 
+{{ if .IsRESTListAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
+    rows, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Query(selectQuery)
+    if err != nil {
+        return nil, err
+    }
+    defer func(rows *sql.Rows) {
+        _ = rows.Close()
+    }(rows)
+
+    var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
+    for rows.Next() {
+        m := models.{{.CapsResourceNameSingular}} {
+           {{range $k, $v := .Fields}}
+               {{GetCompositeFields $k}}
+           {{end}}
+        }
+        if err = rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+            return nil, err
+        }
+        {{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, &m)
+    }
+    if {{.SmallResourceNamePlural}} == nil {
+        {{.SmallResourceNamePlural}} = []*models.{{.CapsResourceNameSingular}}{}
+    }
+	log.Debugf("{{.SmallResourceNameSingular}} listed")
+	return {{.SmallResourceNamePlural}}, nil
+}
+{{ end }}
+
+{{ if .IsRESTGetAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+    row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
+
+    m := models.{{.CapsResourceNameSingular}} {
+       {{range $k, $v := .Fields}}
+           {{GetCompositeFields $k}}
+       {{end}}
+    }
+    if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return nil, sqls.ErrNotExists
+        }
+        return nil, err
+    }
+	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+    return &m, nil
+}
+{{ end }}
+
+{{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
 	if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
@@ -95,7 +150,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 	log.Debugf("{{.SmallResourceNameSingular}} updated")
     return m, nil
 }
+{{ end }}
 
+{{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
 	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(deleteQuery, id)
@@ -115,51 +172,4 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
 	log.Debugf("{{.SmallResourceNameSingular}} deleted")
 	return nil
 }
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
-	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}}"
-    rows, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Query(selectQuery)
-    if err != nil {
-        return nil, err
-    }
-    defer func(rows *sql.Rows) {
-        _ = rows.Close()
-    }(rows)
-
-    var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
-    for rows.Next() {
-        m := models.{{.CapsResourceNameSingular}} {
-           {{range $k, $v := .Fields}}
-               {{GetCompositeFields $k}}
-           {{end}}
-        }
-        if err = rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
-            return nil, err
-        }
-        {{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, &m)
-    }
-    if {{.SmallResourceNamePlural}} == nil {
-        {{.SmallResourceNamePlural}} = []*models.{{.CapsResourceNameSingular}}{}
-    }
-	log.Debugf("{{.SmallResourceNameSingular}} listed")
-	return {{.SmallResourceNamePlural}}, nil
-}
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
-	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
-    row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
-
-    m := models.{{.CapsResourceNameSingular}} {
-       {{range $k, $v := .Fields}}
-           {{GetCompositeFields $k}}
-       {{end}}
-    }
-    if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
-        if errors.Is(err, sql.ErrNoRows) {
-            return nil, sqls.ErrNotExists
-        }
-        return nil, err
-    }
-	log.Debugf("{{.SmallResourceNameSingular}} retrieved")
-    return &m, nil
-}
+{{ end }}

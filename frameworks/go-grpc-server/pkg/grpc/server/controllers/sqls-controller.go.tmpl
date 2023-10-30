@@ -17,7 +17,6 @@ type {{.CapsResourceNameSingular}}Server struct {
 	pb.Unimplemented{{.CapsResourceNameSingular}}ServiceServer
 }
 
-
 func New{{.CapsResourceNameSingular}}Server() (*{{.CapsResourceNameSingular}}Server, error) {
 	{{.SmallResourceNameSingular}}Service, err := services.New{{.CapsResourceNameSingular}}Service()
 	if err != nil {
@@ -34,6 +33,7 @@ func (*{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.{{.Cap
 	}, nil
 }
 
+{{ if .IsGRPCCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Create{{.CapsResourceNameSingular}}Request) (*pb.Create{{.CapsResourceNameSingular}}Response, error) {
 	{{.SmallResourceNameSingular}} := models.{{.CapsResourceNameSingular}}{
         {{range $k, $v := .Fields}}
@@ -52,8 +52,37 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 		Message: "{{.CapsResourceNameSingular}} Created Successfully!",
 	}, nil
 }
+{{ end }}
 
+{{ if .IsGRPCListAllowed }}
+func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(_ context.Context, _ *pb.List{{.CapsResourceNamePlural}}Request) (*pb.List{{.CapsResourceNamePlural}}Response, error) {
+	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
 
+	if err != nil {
+		return nil, err
+	}
+
+	var {{.SmallResourceNameSingular}}List []*pb.{{.CapsResourceNameSingular}}
+	for _, retrieved{{.CapsResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
+		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
+			Id: retrieved{{.CapsResourceNameSingular}}.Id,
+            {{range $k, $v := .Fields}}
+                {{if eq $k "Id"}}
+                {{else}}
+                    {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
+                {{end}}
+            {{end}}
+		}
+		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}}Response)
+	}
+
+	return &pb.List{{.CapsResourceNamePlural}}Response{
+		{{.CapsResourceNameSingular}}: {{.SmallResourceNameSingular}}List,
+	}, nil
+}
+{{ end }}
+
+{{ if .IsGRPCGetAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Get{{.CapsResourceNameSingular}}(ctx context.Context, req *pb.Get{{.CapsResourceNameSingular}}Request) (*pb.Get{{.CapsResourceNameSingular}}Response, error) {
     id := req.GetId()
 	retrieved{{.CapsResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
@@ -84,33 +113,9 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 		{{.CapsResourceNameSingular}}: {{.SmallResourceNameSingular}}Response,
 	}, nil
 }
+{{ end }}
 
-func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) List{{.CapsResourceNamePlural}}(_ context.Context, _ *pb.List{{.CapsResourceNamePlural}}Request) (*pb.List{{.CapsResourceNamePlural}}Response, error) {
-	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
-
-	if err != nil {
-		return nil, err
-	}
-
-	var {{.SmallResourceNameSingular}}List []*pb.{{.CapsResourceNameSingular}}
-	for _, retrieved{{.CapsResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
-		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
-			Id: retrieved{{.CapsResourceNameSingular}}.Id,
-            {{range $k, $v := .Fields}}
-                {{if eq $k "Id"}}
-                {{else}}
-                    {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
-                {{end}}
-            {{end}}
-		}
-		{{.SmallResourceNameSingular}}List = append({{.SmallResourceNameSingular}}List, {{.SmallResourceNameSingular}}Response)
-	}
-
-	return &pb.List{{.CapsResourceNamePlural}}Response{
-		{{.CapsResourceNameSingular}}: {{.SmallResourceNameSingular}}List,
-	}, nil
-}
-
+{{ if .IsGRPCPutAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
 	id := req.GetId()
 
@@ -133,7 +138,9 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 		Message: "{{.CapsResourceNameSingular}} Updated Successfully!",
 	}, nil
 }
+{{ end }}
 
+{{ if .IsGRPCDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Delete{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Delete{{.CapsResourceNameSingular}}Request) (*pb.Delete{{.CapsResourceNameSingular}}Response, error) {
 	id := req.GetId()
 	err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id)
@@ -146,3 +153,4 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 		Message: "{{.CapsResourceNameSingular}} Deleted Successfully!",
 	}, nil
 }
+{{ end }}

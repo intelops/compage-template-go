@@ -28,26 +28,8 @@ func New{{.CapsResourceNameSingular}}Controller() (*{{.CapsResourceNameSingular}
 	}, nil
 }
 
+{{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Create{{.CapsResourceNameSingular}}(context *gin.Context) {
-	// validate input
-	var input models.{{.CapsResourceNameSingular}}
-	if err := context.ShouldBindJSON(&input); err != nil {
-		log.Error(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// trigger {{.SmallResourceNameSingular}} creation
-	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input); err != nil {
-		log.Error(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	context.JSON(http.StatusCreated, gin.H{"message": "{{.CapsResourceNameSingular}} created successfully"})
-}
-
-func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
 	// validate input
 	var input models.{{.CapsResourceNameSingular}}
 	if err := context.ShouldBindJSON(&input); err != nil {
@@ -56,32 +38,38 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	// trigger {{.SmallResourceNameSingular}} creation
+	{{.SmallResourceNameSingular}}Created, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input)
 	if err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// trigger {{.SmallResourceNameSingular}} update
-	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
+	context.JSON(http.StatusCreated, {{.SmallResourceNameSingular}}Created)
+}
+{{ end }}
+
+{{ if .IsRESTListAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) List{{.CapsResourceNamePlural}}(context *gin.Context) {
+	// trigger all {{.SmallResourceNamePlural}} fetching
+	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
+	if err != nil {
 		log.Error(err)
-        if errors.Is(err, sqls.ErrNotExists) {
-            context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-            return
-        }
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "{{.CapsResourceNameSingular}} updated successfully"})
+	context.JSON(http.StatusOK, {{.SmallResourceNamePlural}})
 }
+{{ end }}
 
+{{ if .IsRESTGetAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Fetch{{.CapsResourceNameSingular}}(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		log.Error(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -107,12 +95,46 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 
 	context.JSON(http.StatusOK, {{.SmallResourceNameSingular}})
 }
+{{ end }}
 
+{{ if .IsRESTPutAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
+	// validate input
+	var input models.{{.CapsResourceNameSingular}}
+	if err := context.ShouldBindJSON(&input); err != nil {
+		log.Error(err)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// trigger {{.SmallResourceNameSingular}} update
+	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
+		log.Error(err)
+        if errors.Is(err, sqls.ErrNotExists) {
+            context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+            return
+        }
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusNoContent, gin.H{})
+}
+{{ end }}
+
+{{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		log.Error(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -123,37 +145,30 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"message": "{{.CapsResourceNameSingular}} deleted successfully",
-	})
+	context.JSON(http.StatusNoContent, gin.H{})
 }
+{{ end }}
 
-func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) List{{.CapsResourceNamePlural}}(context *gin.Context) {
-	// trigger all {{.SmallResourceNamePlural}} fetching
-	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
-	if err != nil {
-		log.Error(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	context.JSON(http.StatusOK, {{.SmallResourceNamePlural}})
-}
-
+{{ if .IsRESTPatchAllowed }}
 func (*{{.CapsResourceNameSingular}}Controller) Patch{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "PATCH",
 	})
 }
+{{ end }}
 
+{{ if .IsRESTOptionsAllowed }}
 func (*{{.CapsResourceNameSingular}}Controller) Options{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "OPTIONS",
 	})
 }
+{{ end }}
 
+{{ if .IsRESTHeadAllowed }}
 func (*{{.CapsResourceNameSingular}}Controller) Head{{.CapsResourceNameSingular}}(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message": "HEAD",
 	})
 }
+{{ end }}

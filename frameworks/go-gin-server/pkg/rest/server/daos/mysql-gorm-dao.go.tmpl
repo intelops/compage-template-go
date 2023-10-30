@@ -26,6 +26,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 	}, nil
 }
 
+{{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
     if err := {{.SmallResourceNameSingular}}Dao.db.Create(&m).Error; err != nil {
         log.Debugf("failed to create {{.SmallResourceNameSingular}}: %v", err)
@@ -35,7 +36,38 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
     log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil
 }
+{{ end }}
 
+{{ if .IsRESTListAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+    var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
+    // TODO populate associations here with your own logic - https://gorm.io/docs/belongs_to.html
+    if err := {{.SmallResourceNameSingular}}Dao.db.Find(&{{.SmallResourceNamePlural}}).Error; err != nil {
+        log.Debugf("failed to list {{.SmallResourceNamePlural}}: %v", err)
+        return nil, err
+    }
+
+    log.Debugf("{{.SmallResourceNameSingular}} listed")
+    return {{.SmallResourceNamePlural}}, nil
+}
+{{ end }}
+
+{{ if .IsRESTGetAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+    var m *models.{{.CapsResourceNameSingular}}
+    if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).First(&m).Error; err != nil {
+        log.Debugf("failed to get {{.SmallResourceNameSingular}}: %v", err)
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, sqls.ErrNotExists
+        }
+        return nil, err
+    }
+    log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+    return m, nil
+}
+{{ end }}
+
+{{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
     if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
@@ -60,7 +92,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     log.Debugf("{{.SmallResourceNameSingular}} updated")
     return m, nil
 }
+{{ end }}
 
+{{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
     var m *models.{{.CapsResourceNameSingular}}
     if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).Delete(&m).Error; err != nil {
@@ -71,28 +105,4 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delet
     log.Debugf("{{.SmallResourceNameSingular}} deleted")
     return nil
 }
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
-    var {{.SmallResourceNamePlural}} []*models.{{.CapsResourceNameSingular}}
-    // TODO populate associations here with your own logic - https://gorm.io/docs/belongs_to.html
-    if err := {{.SmallResourceNameSingular}}Dao.db.Find(&{{.SmallResourceNamePlural}}).Error; err != nil {
-        log.Debugf("failed to list {{.SmallResourceNamePlural}}: %v", err)
-        return nil, err
-    }
-
-    log.Debugf("{{.SmallResourceNameSingular}} listed")
-    return {{.SmallResourceNamePlural}}, nil
-}
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
-    var m *models.{{.CapsResourceNameSingular}}
-    if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).First(&m).Error; err != nil {
-        log.Debugf("failed to get {{.SmallResourceNameSingular}}: %v", err)
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, sqls.ErrNotExists
-        }
-        return nil, err
-    }
-    log.Debugf("{{.SmallResourceNameSingular}} retrieved")
-    return m, nil
-}
+{{ end }}

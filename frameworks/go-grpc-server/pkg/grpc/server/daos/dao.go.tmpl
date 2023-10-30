@@ -18,30 +18,15 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 	}, nil
 }
 
+{{ if .IsGRPCCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
 	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
+{{ end }}
 
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
-	if id != {{.SmallResourceNameSingular}}.Id {
-		return nil, status.Error(codes.InvalidArgument, "id and payload don't match")
-	}
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
-
-	return {{.SmallResourceNameSingular}}, nil
-}
-
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
-	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
-		delete({{.SmallResourceNamePlural}}, id)
-		return nil
-	}
-
-	return errors.New("{{.SmallResourceNameSingular}} not found")
-}
-
+{{ if .IsGRPCListAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
 	v := make([]*models.{{.CapsResourceNameSingular}}, len({{.SmallResourceNamePlural}}))
 	for _, value := range {{.SmallResourceNamePlural}} {
@@ -50,7 +35,9 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 
 	return v, nil
 }
+{{ end }}
 
+{{ if .IsGRPCGetAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id == 0 {
 		return nil, status.Error(codes.InvalidArgument, "id can't be empty")
@@ -62,3 +49,26 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 
 	return &models.{{.CapsResourceNameSingular}}{}, errors.New("{{.SmallResourceNameSingular}} not found")
 }
+{{ end }}
+
+{{ if .IsGRPCPutAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+	if id != {{.SmallResourceNameSingular}}.Id {
+		return nil, status.Error(codes.InvalidArgument, "id and payload don't match")
+	}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+
+	return {{.SmallResourceNameSingular}}, nil
+}
+{{ end }}
+
+{{ if .IsGRPCDeleteAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
+		delete({{.SmallResourceNamePlural}}, id)
+		return nil
+	}
+
+	return errors.New("{{.SmallResourceNameSingular}} not found")
+}
+{{ end }}
