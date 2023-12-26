@@ -1,0 +1,11 @@
+package models
+
+type {{.CapsResourceNameSingular}} struct {
+    Id string `json:"id,omitempty" db:"id"`
+{{range $k, $v := .Fields}}
+    {{if eq $k "Id"}}
+    {{else}}
+    {{$k}} {{AddPointerIfCompositeField $k}} `json:"{{ToLowerCamelCase $k}},omitempty" db:"{{ToLowerCamelCase $k}}"`
+    {{end}}
+{{end}}
+}
