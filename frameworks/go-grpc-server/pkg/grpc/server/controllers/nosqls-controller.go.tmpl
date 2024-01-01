@@ -108,7 +108,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
     if len(serviceName) > 0 && len(collectorURL) > 0 {
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(ctx)
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", {{.SmallResourceNameSingular}}.ID))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID))
     }
 
 	return &pb.Get{{.CapsResourceNameSingular}}Response{
