@@ -6,6 +6,7 @@ import (
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
     log "github.com/sirupsen/logrus"
     "gorm.io/gorm"
+    "strings"
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
@@ -54,7 +55,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 {{ end }}
 
 {{ if .IsGRPCGetAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
     var m *models.{{.CapsResourceNameSingular}}
     if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).First(&m).Error; err != nil {
         log.Debugf("failed to get {{.SmallResourceNameSingular}}: %v", err)
@@ -69,11 +70,11 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 {{ end }}
 
 {{ if .IsGRPCPutAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
-    if id == 0 {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id string, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+    if len(id) < 1 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
-    if id != m.Id {
+    if strings.EqualFold(id, m.ID.String()) {
         return nil, errors.New("id and payload don't match")
     }
 
@@ -96,7 +97,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 {{ end }}
 
 {{ if .IsGRPCDeleteAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id string) error {
     var m *models.{{.CapsResourceNameSingular}}
     if err := {{.SmallResourceNameSingular}}Dao.db.Where("id = ?", id).Delete(&m).Error; err != nil {
         log.Debugf("failed to delete {{.SmallResourceNameSingular}}: %v", err)

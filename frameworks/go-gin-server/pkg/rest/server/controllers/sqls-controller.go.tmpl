@@ -10,7 +10,6 @@ import (
     "go.opentelemetry.io/otel/trace"
 	"net/http"
 	"os"
-    "strconv"
     "errors"
 )
 
@@ -66,13 +65,11 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 
 {{ if .IsRESTGetAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Fetch{{.CapsResourceNameSingular}}(context *gin.Context) {
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
-	if err != nil {
-		log.Error(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
+    id := context.Param("id")
+    if len(id) == 0 {
+        context.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+        return
+    }
 	// trigger {{.SmallResourceNameSingular}} fetching
 	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
 	if err != nil {
@@ -90,7 +87,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
     if len(serviceName) > 0 && len(collectorURL) > 0 {
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(context.Request.Context())
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt({{.SmallResourceNameSingular}}.Id, 10)))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", {{.SmallResourceNameSingular}}.ID.String()))
     }
 
 	context.JSON(http.StatusOK, {{.SmallResourceNameSingular}})
@@ -107,12 +104,11 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
-	if err != nil {
-		log.Error(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    id := context.Param("id")
+    if len(id) == 0 {
+        context.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+        return
+    }
 
 	// trigger {{.SmallResourceNameSingular}} update
 	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
@@ -131,12 +127,11 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 
 {{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
-	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
-	if err != nil {
-		log.Error(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    id := context.Param("id")
+    if len(id) == 0 {
+        context.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+        return
+    }
 
 	// trigger {{.SmallResourceNameSingular}} deletion
 	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {

@@ -23,7 +23,7 @@ service {{ .CapsResourceNameSingular }}Service {
 }
 
 message {{.CapsResourceNameSingular}} {
-    int64 id = 1;
+    string id = 1;
     {{range $index, $value := .FieldNames}}
     {{index $.ProtoFields $value}} {{$value}} = {{incCount $index}};
     {{end}}
@@ -51,7 +51,7 @@ message List{{.CapsResourceNamePlural}}Response {
 
 {{ if .IsGRPCGetAllowed }}
 message Get{{.CapsResourceNameSingular}}Request {
-    int64 id = 1;
+    string id = 1;
 }
 
 message Get{{.CapsResourceNameSingular}}Response {
@@ -61,7 +61,7 @@ message Get{{.CapsResourceNameSingular}}Response {
 
 {{ if .IsGRPCPutAllowed }}
 message Update{{.CapsResourceNameSingular}}Request {
-    int64 id = 1;
+    string id = 1;
     {{.CapsResourceNameSingular}} {{.SmallResourceNameSingular}} = 2;
 }
 
@@ -72,7 +72,7 @@ message Update{{.CapsResourceNameSingular}}Response {
 
 {{ if .IsGRPCDeleteAllowed }}
 message Delete{{.CapsResourceNameSingular}}Request {
-    int64 id = 1;
+    string id = 1;
 }
 
 message Delete{{.CapsResourceNameSingular}}Response {

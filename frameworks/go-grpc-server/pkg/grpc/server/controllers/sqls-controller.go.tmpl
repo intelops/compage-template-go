@@ -37,7 +37,7 @@ func (*{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.{{.Cap
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Create{{.CapsResourceNameSingular}}Request) (*pb.Create{{.CapsResourceNameSingular}}Response, error) {
 	{{.SmallResourceNameSingular}} := models.{{.CapsResourceNameSingular}}{
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}: req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
             {{end}}
@@ -67,7 +67,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
 			Id: retrieved{{.CapsResourceNameSingular}}.Id,
             {{range $k, $v := .Fields}}
-                {{if eq $k "Id"}}
+                {{if eq $k "ID"}}
                 {{else}}
                     {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
                 {{end}}
@@ -94,7 +94,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
 		Id: id,
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
             {{end}}
@@ -106,7 +106,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
     if len(serviceName) > 0 && len(collectorURL) > 0 {
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(ctx)
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.Id, 10)))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.ID, 10)))
     }
 
 	return &pb.Get{{.CapsResourceNameSingular}}Response{
@@ -122,7 +122,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
 		Id: id,
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}:  req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
             {{end}}
