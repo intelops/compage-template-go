@@ -38,7 +38,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 	}
 
 	// trigger {{.SmallResourceNameSingular}} creation
-	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input)
+	{{.SmallResourceNameSingular}}Created, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input)
 	 if err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -117,7 +117,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	context.JSON(http.StatusNoContent)
+	context.JSON(http.StatusNoContent, gin.H{})
 }
 {{ end }}
 
@@ -138,7 +138,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 		return
 	}
 
-	context.JSON(http.StatusNoContent)
+	context.JSON(http.StatusNoContent, gin.H{})
 }
 {{ end }}
 
