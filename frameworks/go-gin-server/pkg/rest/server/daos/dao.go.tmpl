@@ -35,7 +35,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 {{ end }}
 
 {{ if .IsRESTGetAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
 	if {{.SmallResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		return {{.SmallResourceNameSingular}}, nil
 	}
@@ -45,7 +45,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 {{ end }}
 
 {{ if .IsRESTPutAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id string, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if id != {{.SmallResourceNameSingular}}.Id {
 		return nil, errors.New("id and payload don't match")
 	}
@@ -56,7 +56,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 {{ end }}
 
 {{ if .IsRESTDeleteAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id string) error {
 	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		delete({{.SmallResourceNamePlural}}, id)
 		return nil

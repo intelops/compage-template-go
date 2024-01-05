@@ -2,14 +2,13 @@ package controllers
 
 import (
 	"context"
-    "go.opentelemetry.io/otel/attribute"
-    "go.opentelemetry.io/otel/trace"
-    "os"
-    "strconv"
-
+    "github.com/google/uuid"
 	pb "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
+    "go.opentelemetry.io/otel/attribute"
+    "go.opentelemetry.io/otel/trace"
+    "os"
 )
 
 type {{.CapsResourceNameSingular}}Server struct {
@@ -106,7 +105,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
     if len(serviceName) > 0 && len(collectorURL) > 0 {
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(ctx)
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.ID, 10)))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID.String())))
     }
 
 	return &pb.Get{{.CapsResourceNameSingular}}Response{
@@ -117,10 +116,13 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 
 {{ if .IsGRPCPutAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
-	id := req.GetId()
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, err
+	}
 
 	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
-		Id: id,
+		ID: id,
         {{range $k, $v := .Fields}}
             {{if eq $k "ID"}}
             {{else}}
@@ -128,7 +130,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
             {{end}}
         {{end}}
 	}
-	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &{{.SmallResourceNameSingular}}Request)
+	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id.String(), &{{.SmallResourceNameSingular}}Request)
 
 	if err != nil {
 		return nil, err
