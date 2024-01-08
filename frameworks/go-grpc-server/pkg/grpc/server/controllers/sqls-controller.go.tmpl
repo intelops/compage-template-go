@@ -2,7 +2,12 @@ package controllers
 
 import (
 	"context"
+{{if .IsStringID}}
     "github.com/google/uuid"
+{{end}}
+{{if .IsIntID}}
+    "strconv"
+{{end}}
 	pb "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/gen/api/v1"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/services"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
@@ -105,7 +110,12 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
     if len(serviceName) > 0 && len(collectorURL) > 0 {
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(ctx)
+   {{if .IsStringID}}
         currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID.String())))
+   {{end}}
+   {{if .IsIntID}}
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.Id, 10)))
+   {{end}}
     }
 
 	return &pb.Get{{.CapsResourceNameSingular}}Response{
@@ -116,10 +126,16 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 
 {{ if .IsGRPCPutAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
+{{if .IsStringID}}
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, err
 	}
+{{end}}
+{{if .IsIntID}}
+	id := req.GetId()
+{{end}}
+
 
 	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
 		ID: id,
@@ -130,7 +146,13 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
             {{end}}
         {{end}}
 	}
+
+   {{if .IsStringID}}
 	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id.String(), &{{.SmallResourceNameSingular}}Request)
+   {{end}}
+   {{if .IsIntID}}
+	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &{{.SmallResourceNameSingular}}Request)
+   {{end}}
 
 	if err != nil {
 		return nil, err
