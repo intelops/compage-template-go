@@ -7,6 +7,9 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
+{{if .IsStringID}}
+    "strings"
+{{end}}
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
@@ -95,7 +98,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 {{ end }}
 
 {{ if .IsRESTGetAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
     row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
 
@@ -116,13 +119,23 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 {{ end }}
 
 {{ if .IsRESTPutAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id string, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
-	if id == 0 {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
+{{if .IsIntID}}
+    if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
     if id != m.Id {
         return nil, errors.New("id and payload don't match")
     }
+{{end}}
+{{if .IsStringID}}
+    if len(id) < 1 {
+        return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
+    }
+    if strings.EqualFold(id, m.ID.String()) {
+        return nil, errors.New("id and payload don't match")
+    }
+{{end}}
 
     {{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
     if err != nil {
@@ -153,7 +166,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 {{ end }}
 
 {{ if .IsRESTDeleteAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id string) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) error {
 	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(deleteQuery, id)
     if err != nil {

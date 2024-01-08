@@ -1,13 +1,15 @@
 package models
 
 import (
-	"github.com/google/uuid"
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
 	"gorm.io/gorm"
 )
 
 type {{.CapsResourceNameSingular}} struct {
 	gorm.Model
-	ID uuid.UUID `gorm:"type:uuid;primaryKey;primaryKey"`
+	{{ GetPrimaryKey gorm }}
 {{range $k, $v := .Fields}}
     {{if eq $k "ID"}}
     {{else}}
@@ -16,8 +18,10 @@ type {{.CapsResourceNameSingular}} struct {
 {{end}}
 }
 
+{{if .IsStringID}}
 // BeforeCreate hook to generate UUID before creating a record
 func (m *{{.CapsResourceNameSingular}}) BeforeCreate(tx *gorm.DB) error {
 	m.ID = uuid.New()
 	return nil
 }
+{{end}}
