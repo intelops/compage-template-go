@@ -1,0 +1,140 @@
+package controllers
+
+import (
+	"github.com/gin-gonic/gin"
+  "github.com/google/uuid"
+	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/services"
+	log "github.com/sirupsen/logrus"
+	"net/http"
+)
+
+type {{.CapsResourceNameSingular}}Controller struct {
+	{{.SmallResourceNameSingular}}Service *services.{{.CapsResourceNameSingular}}Service
+}
+
+func New{{.CapsResourceNameSingular}}Controller() (*{{.CapsResourceNameSingular}}Controller, error) {
+	{{.SmallResourceNameSingular}}Service, err := services.New{{.CapsResourceNameSingular}}Service()
+	if err != nil {
+		return nil, err
+	}
+	return &{{.CapsResourceNameSingular}}Controller{
+		{{.SmallResourceNameSingular}}Service: {{.SmallResourceNameSingular}}Service,
+	}, nil
+}
+
+{{ if .IsRESTCreateAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Create{{.CapsResourceNameSingular}}(context *gin.Context) {
+	// validate input
+	var input models.{{.CapsResourceNameSingular}}
+	if err := context.ShouldBindJSON(&input); err != nil {
+		log.Error(err)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+  input.Id = uuid.New().String()
+	// trigger {{.SmallResourceNameSingular}} creation
+	{{.SmallResourceNameSingular}}Created, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Create{{.CapsResourceNameSingular}}(&input)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusCreated, {{.SmallResourceNameSingular}}Created)
+}
+{{ end }}
+
+{{ if .IsRESTListAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) List{{.CapsResourceNamePlural}}(context *gin.Context) {
+	// trigger all {{.SmallResourceNamePlural}} fetching
+	{{.SmallResourceNamePlural}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.List{{.CapsResourceNamePlural}}()
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, {{.SmallResourceNamePlural}})
+}
+{{ end }}
+
+{{ if .IsRESTGetAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Fetch{{.CapsResourceNameSingular}}(context *gin.Context) {
+	id := context.Param("id")
+
+	// trigger {{.SmallResourceNameSingular}} fetching
+	{{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Get{{.CapsResourceNameSingular}}(id)
+	if err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, {{.SmallResourceNameSingular}})
+}
+{{ end }}
+
+{{ if .IsRESTPutAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
+	id := context.Param("id")
+
+	// validate input
+	var input models.{{.CapsResourceNameSingular}}
+	if err := context.ShouldBindJSON(&input); err != nil {
+		log.Error(err)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	// trigger {{.SmallResourceNameSingular}} update
+	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id,&input); err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusNoContent, gin.H{})
+
+}
+{{ end }}
+
+{{ if .IsRESTDeleteAllowed }}
+func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
+  id := context.Param("id")
+
+	// trigger {{.SmallResourceNameSingular}} deletion
+	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {
+		log.Error(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusNoContent, gin.H{})
+}
+{{ end }}
+
+{{ if .IsRESTPatchAllowed }}
+func (*{{.CapsResourceNameSingular}}Controller) Patch{{.CapsResourceNameSingular}}(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "PATCH",
+	})
+}
+{{ end }}
+
+{{ if .IsRESTOptionsAllowed }}
+func (*{{.CapsResourceNameSingular}}Controller) Options{{.CapsResourceNameSingular}}(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "OPTIONS",
+	})
+}
+{{ end }}
+
+{{ if .IsRESTHeadAllowed }}
+func (*{{.CapsResourceNameSingular}}Controller) Head{{.CapsResourceNameSingular}}(context *gin.Context) {
+	context.JSON(http.StatusOK, gin.H{
+		"message": "HEAD",
+	})
+}
+{{ end }}
