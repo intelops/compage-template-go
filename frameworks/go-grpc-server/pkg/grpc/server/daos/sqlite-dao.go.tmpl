@@ -6,7 +6,7 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
     log "github.com/sirupsen/logrus"
-{{if .IsStringID}}
+{{if and .IsStringID .IsGRPCPutAllowed}} }}
     "strings"
 {{end}}
 )
@@ -53,11 +53,13 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
     if err != nil {
         return nil, err
     }
+  {{if .IsIntID}}
     id, err := res.LastInsertId()
     if err != nil {
         return nil, err
     }
     m.ID = id
+  {{end}}
 
 	log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil
