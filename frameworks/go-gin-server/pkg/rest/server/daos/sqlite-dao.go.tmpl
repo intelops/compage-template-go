@@ -6,8 +6,11 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
-{{if and .IsStringID .IsGRPCPutAllowed}} }}
+{{if and .IsStringID .IsRESTPutAllowed}} }}
     "strings"
+{{end}}
+{{if .IsStringID}}
+    "github.com/google/uuid"
 {{end}}
 )
 
@@ -48,6 +51,9 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+{{if .IsStringID}}
+    m.ID := uuid.New().String()
+{{end}}
 	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
     if err != nil {

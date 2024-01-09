@@ -9,6 +9,9 @@ import (
 {{if and .IsStringID .IsGRPCPutAllowed}} }}
     "strings"
 {{end}}
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
@@ -48,6 +51,9 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsGRPCCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+{{if .IsStringID}}
+    m.ID := uuid.New().String()
+{{end}}
 	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
     if err != nil {

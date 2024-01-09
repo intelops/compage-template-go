@@ -3,9 +3,17 @@ package daos
 import (
 	"errors"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
 )
 
+{{if .IsStringID}}
+var {{.SmallResourceNamePlural}} = make(map[string]*models.{{.CapsResourceNameSingular}})
+{{end}}
+{{if .IsIntID}}
 var {{.SmallResourceNamePlural}} = make(map[int64]*models.{{.CapsResourceNameSingular}})
+{{end}}
 
 type {{.CapsResourceNameSingular}}Dao struct {
 }

@@ -1,4 +1,7 @@
 package models
+{{if .IsStringID}}
+import "github.com/google/uuid"
+{{end}}
 
 type {{.CapsResourceNameSingular}} struct {
 {{GetPrimaryKey ""}}
