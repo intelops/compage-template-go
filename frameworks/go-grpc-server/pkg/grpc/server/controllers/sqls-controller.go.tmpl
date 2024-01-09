@@ -69,7 +69,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	var {{.SmallResourceNameSingular}}List []*pb.{{.CapsResourceNameSingular}}
 	for _, retrieved{{.CapsResourceNameSingular}} := range {{.SmallResourceNamePlural}} {
 		{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
-			Id: retrieved{{.CapsResourceNameSingular}}.Id,
+			Id: retrieved{{.CapsResourceNameSingular}}.ID,
             {{range $k, $v := .Fields}}
                 {{if eq $k "ID"}}
                 {{else}}
@@ -114,7 +114,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
         currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID.String())))
    {{end}}
    {{if .IsIntID}}
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.Id, 10)))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.ID, 10)))
    {{end}}
     }
 

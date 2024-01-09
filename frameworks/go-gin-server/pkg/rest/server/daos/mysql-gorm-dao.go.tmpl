@@ -76,7 +76,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
-    if id != m.Id {
+    if id != m.ID {
         return nil, errors.New("id and payload don't match")
     }
 {{end}}

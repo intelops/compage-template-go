@@ -17,7 +17,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
@@ -50,7 +50,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
     if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
-    if id != m.Id {
+    if id != m.ID {
         return nil, errors.New("id and payload don't match")
     }
 {{end}}
@@ -62,7 +62,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
         return nil, errors.New("id and payload don't match")
     }
 {{end}}
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }

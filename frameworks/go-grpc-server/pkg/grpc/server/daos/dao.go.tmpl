@@ -20,7 +20,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsGRPCCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
@@ -53,10 +53,10 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 
 {{ if .IsGRPCPutAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
-	if id != {{.SmallResourceNameSingular}}.Id {
+	if id != {{.SmallResourceNameSingular}}.ID {
 		return nil, status.Error(codes.InvalidArgument, "id and payload don't match")
 	}
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
