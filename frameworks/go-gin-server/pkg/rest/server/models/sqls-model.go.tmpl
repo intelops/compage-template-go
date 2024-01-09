@@ -1,7 +1,7 @@
 package models
 
 type {{.CapsResourceNameSingular}} struct {
-{{ GetPrimaryKey }}
+{{GetPrimaryKey ""}}
 {{range $k, $v := .Fields}}
     {{if eq $k "ID"}}
     {{else}}

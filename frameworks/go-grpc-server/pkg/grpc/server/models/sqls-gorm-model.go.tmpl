@@ -9,7 +9,7 @@ import (
 
 type {{.CapsResourceNameSingular}} struct {
 	gorm.Model
-	{{ GetPrimaryKey gorm }}
+	{{GetPrimaryKey gorm}}
 {{range $k, $v := .Fields}}
     {{if eq $k "ID"}}
     {{else}}
