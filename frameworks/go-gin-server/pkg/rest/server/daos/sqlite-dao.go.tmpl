@@ -52,7 +52,7 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 {{if .IsStringID}}
-    m.ID := uuid.New().String()
+    m.ID = uuid.New()
 {{end}}
 	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
