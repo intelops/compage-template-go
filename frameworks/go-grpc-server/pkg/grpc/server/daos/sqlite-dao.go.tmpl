@@ -53,19 +53,24 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 {{if .IsStringID}}
     m.ID = uuid.New()
+    insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
+    _, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
+    if err != nil {
+        return nil, err
+    }
 {{end}}
-	insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
+{{if .IsIntID}}
+    insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}})values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
     if err != nil {
         return nil, err
     }
-  {{if .IsIntID}}
     id, err := res.LastInsertId()
     if err != nil {
         return nil, err
     }
     m.ID = id
-  {{end}}
+{{end}}
 
 	log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil

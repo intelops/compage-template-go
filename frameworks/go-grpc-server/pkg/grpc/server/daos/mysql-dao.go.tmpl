@@ -54,7 +54,20 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
 {{if .IsStringID}}
     m.ID = uuid.New()
+    insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
+    _, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
+    if err != nil {
+        var mysqlErr *mysql.MySQLError
+        if errors.As(err, &mysqlErr) {
+            if mysqlErr.Number == 1062 {
+                return nil, sqls.ErrDuplicate
+            }
+        }
+        return nil, err
+    }
 {{end}}
+
+{{if .IsIntID}}
     insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
     if err != nil {
@@ -66,14 +79,12 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
         }
         return nil, err
     }
-
-  {{if .IsIntID}}
     id, err := res.LastInsertId()
     if err != nil {
         return nil, err
     }
     m.ID = id
-  {{end}}
+{{end}}
 	log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil
 }
