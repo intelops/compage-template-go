@@ -6,7 +6,7 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/grpc/server/models"
     log "github.com/sirupsen/logrus"
-{{if and .IsStringID .IsGRPCPutAllowed}} }}
+{{if and .IsStringID .IsGRPCPutAllowed}}
     "strings"
 {{end}}
 {{if .IsStringID}}

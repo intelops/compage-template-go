@@ -7,7 +7,7 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
-{{if and .IsStringID .IsRESTPutAllowed}} }}
+{{if and .IsStringID .IsRESTPutAllowed}}
     "strings"
 {{end}}
 {{if .IsStringID}}
