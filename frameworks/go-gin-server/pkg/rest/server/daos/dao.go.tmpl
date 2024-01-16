@@ -25,6 +25,12 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
+{{if .IsStringID}}
+    {{.SmallResourceNameSingular}}.ID = uuid.New().String()
+{{end}}
+{{if .IsIntID}}
+    {{.SmallResourceNameSingular}}.ID = int64(len({{.SmallResourceNamePlural}}) + 1)
+{{end}}
 	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil

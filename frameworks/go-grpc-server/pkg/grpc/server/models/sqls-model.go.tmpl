@@ -1,13 +1,13 @@
 package models
 {{if .IsStringID}}
- import "github.com/google/uuid"
+import "github.com/google/uuid"
 {{end}}
 type {{.CapsResourceNameSingular}} struct {
-    {{GetPrimaryKey ""}}
-    {{range $k, $v := .Fields}}
-        {{if eq $k "ID"}}
-        {{else}}
-            {{$k}} {{$v}} `json:"{{ToLowerCamelCase $k}},omitempty"`
-        {{end}}
+{{GetPrimaryKey ""}}
+{{range $k, $v := .Fields}}
+    {{if eq $k "ID"}}
+    {{else}}
+    {{$k}} {{$v}} `json:"{{ToLowerCamelCase $k}},omitempty"`
     {{end}}
+{{end}}
 }
