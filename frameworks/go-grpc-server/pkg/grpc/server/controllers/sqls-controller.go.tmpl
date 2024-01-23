@@ -126,6 +126,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 
 {{ if .IsGRPCPutAllowed }}
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Update{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Update{{.CapsResourceNameSingular}}Request) (*pb.Update{{.CapsResourceNameSingular}}Response, error) {
+    var err error
 {{if .IsStringID}}
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
@@ -135,7 +136,6 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 {{if .IsIntID}}
 	id := req.GetId()
 {{end}}
-
 
 	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
 		ID: id,
@@ -148,10 +148,10 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	}
 
    {{if .IsStringID}}
-	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id.String(), &{{.SmallResourceNameSingular}}Request)
+	_, err = {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id.String(), &{{.SmallResourceNameSingular}}Request)
    {{end}}
    {{if .IsIntID}}
-	_, err := {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &{{.SmallResourceNameSingular}}Request)
+	_, err = {{.SmallResourceNameSingular}}Server.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &{{.SmallResourceNameSingular}}Request)
    {{end}}
 
 	if err != nil {

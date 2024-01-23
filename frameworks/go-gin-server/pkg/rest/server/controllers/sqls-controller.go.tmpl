@@ -114,9 +114,10 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 
 {{ if .IsRESTPutAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Update{{.CapsResourceNameSingular}}(context *gin.Context) {
+    var err error
 	// validate input
 	var input models.{{.CapsResourceNameSingular}}
-	if err := context.ShouldBindJSON(&input); err != nil {
+	if err = context.ShouldBindJSON(&input); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
@@ -138,7 +139,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
     }
 {{end}}
 	// trigger {{.SmallResourceNameSingular}} update
-	if _, err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
+	if _, err = {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Update{{.CapsResourceNameSingular}}(id, &input); err != nil {
 		log.Error(err)
         if errors.Is(err, sqls.ErrNotExists) {
             context.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -154,6 +155,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
 
 {{ if .IsRESTDeleteAllowed }}
 func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Controller) Delete{{.CapsResourceNameSingular}}(context *gin.Context) {
+    var err error
 {{if .IsIntID}}
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
@@ -170,7 +172,7 @@ func ({{.SmallResourceNameSingular}}Controller *{{.CapsResourceNameSingular}}Con
     }
 {{end}}
 	// trigger {{.SmallResourceNameSingular}} deletion
-	if err := {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {
+	if err = {{.SmallResourceNameSingular}}Controller.{{.SmallResourceNameSingular}}Service.Delete{{.CapsResourceNameSingular}}(id); err != nil {
 		log.Error(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
