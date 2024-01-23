@@ -111,7 +111,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
         // get the current span by the request context
         currentSpan := trace.SpanFromContext(ctx)
    {{if .IsStringID}}
-        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID.String())))
+        currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", retrieved{{.CapsResourceNameSingular}}.ID.String()))
    {{end}}
    {{if .IsIntID}}
         currentSpan.SetAttributes(attribute.String("{{.SmallResourceNameSingular}}.id", strconv.FormatInt(retrieved{{.CapsResourceNameSingular}}.ID, 10)))
