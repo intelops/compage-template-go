@@ -7,7 +7,7 @@ type {{.CapsResourceNameSingular}} struct {
 {{range $k, $v := .Fields}}
     {{if eq $k "ID"}}
     {{else}}
-    {{$k}} {{$v}} `json:"{{ToLowerCamelCase $k}},omitempty"`
+    {{AddFieldWithDetails $k $v "sql"}}
     {{end}}
 {{end}}
 }
