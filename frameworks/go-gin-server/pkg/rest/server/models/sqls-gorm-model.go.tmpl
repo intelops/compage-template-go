@@ -13,7 +13,7 @@ type {{.CapsResourceNameSingular}} struct {
 {{range $k, $v := .Fields}}
     {{if eq $k "ID"}}
     {{else}}
-    {{AddForeignKeyIfCompositeField $k $v}}
+    {{AddFieldWithDetails $k $v "gorm"}}
     {{end}}
 {{end}}
 }
