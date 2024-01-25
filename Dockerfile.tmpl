@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . .
 
 # Build application
-RUN go mod tidy && go build -ldflags '-s -w' -o main .
+RUN go get ./... && go mod tidy && go build -ldflags '-s -w' -o main .
 
 # Container start command for development
 CMD ["go", "run", "main.go"]

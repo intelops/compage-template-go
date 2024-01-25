@@ -33,6 +33,7 @@ jobs:
       - name: Build
         run: |
           cd [[.NodeName]]
+          go get ./...
           go mod tidy
           go build -v ./...
           cd ..
