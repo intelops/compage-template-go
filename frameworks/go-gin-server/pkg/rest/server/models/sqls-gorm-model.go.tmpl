@@ -1,14 +1,27 @@
 package models
 
-import "gorm.io/gorm"
+import (
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
+	"gorm.io/gorm"
+)
 
 type {{.CapsResourceNameSingular}} struct {
 	gorm.Model
-    Id int64 `gorm:"primaryKey;autoIncrement" json:"ID,omitempty"`
+	{{GetPrimaryKey "gorm"}}
 {{range $k, $v := .Fields}}
-    {{if eq $k "Id"}}
+    {{if eq $k "ID"}}
     {{else}}
-    {{AddForeignKeyIfCompositeField $k $v}}
+    {{AddFieldWithDetails $k $v "gorm"}}
     {{end}}
 {{end}}
 }
+
+{{if .IsStringID}}
+// BeforeCreate hook to generate UUID before creating a record
+func (m *{{.CapsResourceNameSingular}}) BeforeCreate(tx *gorm.DB) error {
+	m.ID = uuid.New()
+	return nil
+}
+{{end}}

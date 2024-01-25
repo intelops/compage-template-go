@@ -38,7 +38,7 @@ func (*{{.CapsResourceNameSingular}}Server) Ping(_ context.Context, _ *pb.{{.Cap
 func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server) Create{{.CapsResourceNameSingular}}(_ context.Context, req *pb.Create{{.CapsResourceNameSingular}}Request) (*pb.Create{{.CapsResourceNameSingular}}Response, error) {
 	{{.SmallResourceNameSingular}} := models.{{.CapsResourceNameSingular}}{
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}: req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
             {{end}}
@@ -95,7 +95,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	{{.SmallResourceNameSingular}}Response := &pb.{{.CapsResourceNameSingular}}{
 		Id: id,
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}:  retrieved{{$.CapsResourceNameSingular}}.{{$k}},
             {{end}}
@@ -124,7 +124,7 @@ func ({{.SmallResourceNameSingular}}Server *{{.CapsResourceNameSingular}}Server)
 	{{.SmallResourceNameSingular}}Request := models.{{.CapsResourceNameSingular}}{
 		ID: id,
         {{range $k, $v := .Fields}}
-            {{if eq $k "Id"}}
+            {{if eq $k "ID"}}
             {{else}}
                 {{$k}}:  req.{{$.CapsResourceNameSingular}}.Get{{$k}}(),
             {{end}}

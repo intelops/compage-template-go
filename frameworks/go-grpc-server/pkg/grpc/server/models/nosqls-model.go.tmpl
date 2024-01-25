@@ -5,7 +5,7 @@ type {{.CapsResourceNameSingular}} struct {
     {{range $k, $v := .Fields}}
         {{if eq $k "ID"}}
         {{else}}
-            {{$k}} {{$v}}  `json:"{{ToLowerCamelCase $k}},omitempty" bson:"{{ToLowerCamelCase $k}},omitempty"`
+            {{AddFieldWithDetails $k $v "mongo"}}
         {{end}}
     {{end}}
 }

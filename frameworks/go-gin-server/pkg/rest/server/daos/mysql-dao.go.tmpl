@@ -7,6 +7,12 @@ import (
     "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/sqls"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
     log "github.com/sirupsen/logrus"
+{{if and .IsStringID .IsRESTPutAllowed}}
+    "strings"
+{{end}}
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
 )
 
 type {{.CapsResourceNameSingular}}Dao struct {
@@ -16,7 +22,12 @@ type {{.CapsResourceNameSingular}}Dao struct {
 func migrate{{.CapsResourceNamePlural}}(r *sqls.MySQLClient) error {
 	query := `
 	CREATE TABLE IF NOT EXISTS {{.SmallResourceNamePlural}}(
-		ID int NOT NULL AUTO_INCREMENT,
+      {{if .IsIntID}}
+        ID int NOT NULL AUTO_INCREMENT,
+      {{end}}
+      {{if .IsStringID}}
+        ID varchar(36) NOT NULL,
+      {{end}}
         {{.CreateQueryColumns}}
 	    PRIMARY KEY (ID)
 	);
@@ -41,6 +52,22 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+{{if .IsStringID}}
+    m.ID = uuid.New()
+    insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
+    _, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
+    if err != nil {
+        var mysqlErr *mysql.MySQLError
+        if errors.As(err, &mysqlErr) {
+            if mysqlErr.Number == 1062 {
+                return nil, sqls.ErrDuplicate
+            }
+        }
+        return nil, err
+    }
+{{end}}
+
+{{if .IsIntID}}
     insertQuery := "INSERT INTO {{.SmallResourceNamePlural}}({{.InsertQueryColumns}}) values({{.InsertQueryParams}})"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(insertQuery, {{.InsertQueryExecColumns}})
     if err != nil {
@@ -52,12 +79,13 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Creat
         }
         return nil, err
     }
-
     id, err := res.LastInsertId()
     if err != nil {
         return nil, err
     }
-    m.Id = id
+    m.ID = id
+{{end}}
+    log.Debugf("")
 	log.Debugf("{{.SmallResourceNameSingular}} created")
     return m, nil
 }
@@ -81,7 +109,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
                {{GetCompositeFields $k}}
            {{end}}
         }
-        if err = rows.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+        if err = rows.Scan(&m.ID, {{.GetQueryExecColumns}}); err != nil {
             return nil, err
         }
         {{.SmallResourceNamePlural}} = append({{.SmallResourceNamePlural}}, &m)
@@ -95,8 +123,8 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 {{ end }}
 
 {{ if .IsRESTGetAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
-	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) (*models.{{.CapsResourceNameSingular}}, error) {
+	selectQuery := "SELECT * FROM {{.SmallResourceNamePlural}} WHERE ID = ?"
     row := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.QueryRow(selectQuery, id)
 
     m := models.{{.CapsResourceNameSingular}} {
@@ -104,7 +132,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
            {{GetCompositeFields $k}}
        {{end}}
     }
-    if err := row.Scan(&m.Id, {{.GetQueryExecColumns}}); err != nil {
+    if err := row.Scan(&m.ID, {{.GetQueryExecColumns}}); err != nil {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, sqls.ErrNotExists
         }
@@ -116,13 +144,23 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 {{ end }}
 
 {{ if .IsRESTPutAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
-	if id == 0 {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error)  {
+{{if .IsIntID}}
+    if id == 0 {
         return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
     }
-    if id != m.Id {
+    if id != m.ID {
         return nil, errors.New("id and payload don't match")
     }
+{{end}}
+{{if .IsStringID}}
+    if len(id) < 1 {
+        return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
+    }
+    if strings.EqualFold(id, m.ID.String()) {
+        return nil, errors.New("id and payload don't match")
+    }
+{{end}}
 
     {{.SmallResourceNameSingular}}, err := {{.SmallResourceNameSingular}}Dao.Get{{.CapsResourceNameSingular}}(id)
     if err != nil {
@@ -132,7 +170,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
         return nil, sql.ErrNoRows
     }
 
-    updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE Id = ?"
+    updateQuery := "UPDATE {{.SmallResourceNamePlural}} SET {{.UpdateQueryColumnsAndParams}} WHERE ID = ?"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(updateQuery, {{.UpdateQueryExecColumns}}, id)
     if err != nil {
         return nil, err
@@ -153,8 +191,8 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Updat
 {{ end }}
 
 {{ if .IsRESTDeleteAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
-	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE Id = ?"
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) error {
+	deleteQuery := "DELETE FROM {{.SmallResourceNamePlural}} WHERE ID = ?"
     res, err := {{.SmallResourceNameSingular}}Dao.sqlClient.DB.Exec(deleteQuery, id)
     if err != nil {
         return err

@@ -50,30 +50,56 @@ http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}
 {{ if $v.IsRESTPutAllowed }}
 # Put
 ```
+{{if .IsStringID}}
+curl -X PUT -H "Content-Type: application/json" \
+-d '{{$v.ResourcePutBody}}' \
+http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/b2b7ef10-e53c-4e52-b72f-ce03139624f9
+{{end}}
+{{if .IsIntID}}
 curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
+{{end}}
 ```
 # Put
 ### wrong id passed in param
 ```
+{{if .IsStringID}}
+curl -X PUT -H "Content-Type: application/json" \
+-d '{{$v.ResourcePutBody}}' \
+http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/b2b7ef10-e53c-4e52-b72f-ce03139624ss
+{{end}}
+{{if .IsIntID}}
 curl -X PUT -H "Content-Type: application/json" \
 -d '{{$v.ResourcePutBody}}' \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/1234
+{{end}}
 ```
 {{ end }}
 {{ if $v.IsRESTGetAllowed }}
 # Get  (retrieve specific {{$v.CapsResourceNameSingular}})
 ```
+{{if .IsStringID}}
+curl -X GET -H "Content-Type: application/json" \
+http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/b2b7ef10-e53c-4e52-b72f-ce03139624f9
+{{end}}
+{{if .IsIntID}}
 curl -X GET -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
+{{end}}
 ```
 {{ end }}
 {{ if $v.IsRESTDeleteAllowed }}
 # Delete
 ```
+{{if .IsStringID}}
+curl -X DELETE -H "Content-Type: application/json" \
+http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/b2b7ef10-e53c-4e52-b72f-ce03139624f9
+{{end}}
+{{if .IsIntID}}
 curl -X DELETE -H "Content-Type: application/json" \
 http://localhost:{{$.RestServerPort}}/v1/{{$v.SmallResourceNamePlural}}/123
+{{end}}
 ```
 {{ end }}
 {{ end }}

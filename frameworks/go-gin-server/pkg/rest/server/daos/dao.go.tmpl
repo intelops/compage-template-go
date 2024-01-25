@@ -3,9 +3,17 @@ package daos
 import (
 	"errors"
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+{{if .IsStringID}}
+    "github.com/google/uuid"
+{{end}}
 )
 
+{{if .IsStringID}}
+var {{.SmallResourceNamePlural}} = make(map[string]*models.{{.CapsResourceNameSingular}})
+{{end}}
+{{if .IsIntID}}
 var {{.SmallResourceNamePlural}} = make(map[int64]*models.{{.CapsResourceNameSingular}})
+{{end}}
 
 type {{.CapsResourceNameSingular}}Dao struct {
 }
@@ -17,7 +25,13 @@ func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, e
 
 {{ if .IsRESTCreateAllowed }}
 func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}({{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}})  (*models.{{.CapsResourceNameSingular}}, error) {
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+{{if .IsStringID}}
+    {{.SmallResourceNameSingular}}.ID = uuid.New().String()
+{{end}}
+{{if .IsIntID}}
+    {{.SmallResourceNameSingular}}.ID = int64(len({{.SmallResourceNamePlural}}) + 1)
+{{end}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
@@ -35,7 +49,7 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{
 {{ end }}
 
 {{ if .IsRESTGetAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id int64) (*models.{{.CapsResourceNameSingular}}, error) {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) (*models.{{.CapsResourceNameSingular}}, error) {
 	if {{.SmallResourceNameSingular}}, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		return {{.SmallResourceNameSingular}}, nil
 	}
@@ -45,18 +59,31 @@ func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{
 {{ end }}
 
 {{ if .IsRESTPutAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id int64, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
-	if id != {{.SmallResourceNameSingular}}.Id {
-		return nil, errors.New("id and payload don't match")
-	}
-	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.Id] = {{.SmallResourceNameSingular}}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}, {{.SmallResourceNameSingular}} *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+{{if .IsIntID}}
+    if id == 0 {
+        return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
+    }
+    if id != m.ID {
+        return nil, errors.New("id and payload don't match")
+    }
+{{end}}
+{{if .IsStringID}}
+    if len(id) < 1 {
+        return nil, errors.New("invalid {{.SmallResourceNameSingular}} ID")
+    }
+    if strings.EqualFold(id, m.ID.String()) {
+        return nil, errors.New("id and payload don't match")
+    }
+{{end}}
+	{{.SmallResourceNamePlural}}[{{.SmallResourceNameSingular}}.ID] = {{.SmallResourceNameSingular}}
 
 	return {{.SmallResourceNameSingular}}, nil
 }
 {{ end }}
 
 {{ if .IsRESTDeleteAllowed }}
-func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id int64) error {
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id {{GetPrimaryKeyType}}) error {
 	if _, ok := {{.SmallResourceNamePlural}}[id]; ok {
 		delete({{.SmallResourceNamePlural}}, id)
 		return nil
