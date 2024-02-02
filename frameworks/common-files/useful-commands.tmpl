@@ -95,4 +95,24 @@ SELECT host FROM mysql.user WHERE User = 'root';
 CREATE USER 'root'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
 ```
+
+# Run ScyllaDB server in docker on local
+```
+docker pull scylladb/scylla
+docker pull scylladb/scylla
+docker run --name scylla-local -p 9042:9042 -d scylladb/scylla
+docker exec -it scylla-local nodetool status
+docker exec -it scylla-local cqlsh
+CREATE KEYSPACE "YOUR KEYSPACE NAME GOES HERE WITHOUT QUOTES" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+USE "YOUR KEYSPACE NAME GOES HERE WITHOUT QUOTES";
+# To describe KEYSPACE
+DESC KEYSPACES;
+# To describe Tables
+DESC TABLES;
+```
+
+# Run ScyllaDB Code in local server:
+```
+SCYLLA_DB_HOST=127.0.0.1 SCYLLA_KEYSPACE="YOUR KEYSPACE NAME GOES HERE WITHOUT QUOTES" go run main.go 
+```
 {{end}}
