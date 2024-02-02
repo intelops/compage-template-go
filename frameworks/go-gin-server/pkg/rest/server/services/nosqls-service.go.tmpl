@@ -2,7 +2,9 @@ package services
 
 import (
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos"
+	{{ if or .IsRESTGetAllowed .IsRESTCreateAllowed .IsRESTListAllowed .IsRESTPutAllowed }}
 	"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+	{{ end }}
 )
 
 type {{.CapsResourceNameSingular}}Service struct {

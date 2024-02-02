@@ -3,7 +3,9 @@ package daos
 
 import (
  "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/nosqls"
+ {{ if or .IsRESTGetAllowed .IsRESTCreateAllowed .IsRESTListAllowed .IsRESTPutAllowed }}
 "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+ {{ end }}
  "github.com/scylladb/gocqlx/v2"
  "github.com/scylladb/gocqlx/v2/qb"
  log "github.com/sirupsen/logrus"
