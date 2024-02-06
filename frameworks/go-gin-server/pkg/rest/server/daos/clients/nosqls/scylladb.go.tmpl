@@ -1,0 +1,75 @@
+package nosqls
+
+
+import (
+ "fmt"
+ "os"
+ "sync"
+
+
+ "github.com/gocql/gocql"
+ "github.com/scylladb/gocqlx/v2"
+)
+
+
+var (
+ user     = os.Getenv("SCYLLA_DB_USER")
+ password = os.Getenv("SCYLLA_DB_PASSWORD")
+ host     = os.Getenv("SCYLLA_DB_HOST")
+ // enable this port if you have to specify
+ // port     = os.Getenv("SCYLLA_DB_PORT")
+ keyspace = os.Getenv("SCYLLA_KEYSPACE")
+)
+
+
+var o sync.Once
+var session gocqlx.Session
+var scyllaDBClient *ScyllaDBClient
+var scyllaDBErr error
+
+
+type ScyllaDBClient struct {
+ Session gocqlx.Session
+}
+
+
+func NewScyllaDBClient(dbSession gocqlx.Session) *ScyllaDBClient {
+ return &ScyllaDBClient{Session: dbSession}
+}
+
+
+func InitScyllaDB() (*ScyllaDBClient, error) {
+ o.Do(func() {
+   cluster := gocql.NewCluster(host)
+   cluster.Keyspace = keyspace
+   cluster.Consistency = gocql.One
+   cluster.Authenticator = gocql.PasswordAuthenticator{Username: user, Password: password}
+   cluster.Compressor = &gocql.SnappyCompressor{}
+cluster.RetryPolicy = &gocql.ExponentialBackoffRetryPolicy{NumRetries: 3}
+   session, scyllaDBErr = gocqlx.WrapSession(cluster.CreateSession())
+   scyllaDBClient = NewScyllaDBClient(session)
+ })
+ return scyllaDBClient, scyllaDBErr
+}
+
+
+func (s *ScyllaDBClient) GetSession() gocqlx.Session {
+ return s.Session
+}
+
+
+func (s *ScyllaDBClient) GetKeyspace() string {
+ return keyspace
+}
+
+
+func (s *ScyllaDBClient) CreateKeyspace(keyspace string) error {
+ tmt := fmt.Sprintf(`CREATE KEYSPACE IF NOT EXISTS %s  WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}`, keyspace)
+ return s.Session.ExecStmt(tmt)
+}
+
+
+func (s *ScyllaDBClient) CreateTable(query string, table string) error {
+ tmt := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.%s (%s)`, keyspace, table, query)
+ return s.Session.Query(tmt, []string{}).ExecRelease()
+}

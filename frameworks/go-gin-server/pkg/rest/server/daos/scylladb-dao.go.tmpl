@@ -1,0 +1,103 @@
+package daos
+
+
+import (
+ "{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/daos/clients/nosqls"
+ {{ if or .IsRESTGetAllowed .IsRESTCreateAllowed .IsRESTListAllowed .IsRESTPutAllowed }}
+"{{.GitPlatformURL}}/{{.GitPlatformUserName}}/{{.GitRepositoryName}}/{{.NodeName}}/pkg/rest/server/models"
+ {{ end }}
+ "github.com/scylladb/gocqlx/v2"
+ "github.com/scylladb/gocqlx/v2/qb"
+ log "github.com/sirupsen/logrus"
+)
+
+type {{.CapsResourceNameSingular}}Dao struct {
+ scyllaClient *nosqls.ScyllaDBClient
+}
+
+func migrate{{.CapsResourceNamePlural}}(s *nosqls.ScyllaDBClient) error {
+  query := `id Text PRIMARY KEY,
+  {{.CreateQueryColumns}}
+  `
+  return s.CreateTable(query, "{{.SmallResourceNamePlural}}")
+}
+
+func New{{.CapsResourceNameSingular}}Dao() (*{{.CapsResourceNameSingular}}Dao, error) {
+  scyllaClient, err := nosqls.InitScyllaDB()
+  if err != nil {
+    return nil, err
+  }
+  err = migrate{{.CapsResourceNamePlural}}(scyllaClient)
+  if err != nil {
+    return nil, err
+  }
+  return &{{.CapsResourceNameSingular}}Dao{scyllaClient}, nil
+}
+
+{{ if .IsRESTCreateAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Create{{.CapsResourceNameSingular}}(m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+ stmt, names := qb.Insert("{{.SmallResourceNamePlural}}").Columns("id",{{range $k, $v := .Fields}}"{{ToLowerCamelCase $k}}",{{end}}
+ ).ToCql()
+ err := gocqlx.Session.Query({{.SmallResourceNameSingular}}Dao.scyllaClient.Session, stmt, names).BindStruct(m).ExecRelease()
+
+ if err != nil {
+   return nil, err
+ }
+  log.Debugf("{{.SmallResourceNameSingular}} created")
+ return m, nil
+}
+{{ end }}
+
+{{ if .IsRESTListAllowed }} 
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) List{{.CapsResourceNamePlural}}() ([]*models.{{.CapsResourceNameSingular}}, error) {
+ stmt, names := qb.Select("{{.SmallResourceNamePlural}}").ToCql()
+ var m []*models.{{.CapsResourceNameSingular}}
+ err := gocqlx.Session.Query({{.SmallResourceNameSingular}}Dao.scyllaClient.Session, stmt, names).Select(&m)
+ if err != nil {
+   return nil, err
+ }
+ log.Debugf("{{.SmallResourceNameSingular}} listed")
+ return m, nil
+}
+{{ end }}
+
+{{ if .IsRESTGetAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Get{{.CapsResourceNameSingular}}(id string) (*models.{{.CapsResourceNameSingular}}, error) {
+ stmt, names := qb.Select("{{.SmallResourceNamePlural}}").Where(qb.Eq("id")).ToCql()
+ m := &models.{{.CapsResourceNameSingular}}{}
+ err := gocqlx.Session.Query({{.SmallResourceNameSingular}}Dao.scyllaClient.Session, stmt, names).Bind(id).Get(m)
+ if err != nil {
+   return nil, err
+ }
+ log.Debugf("{{.SmallResourceNameSingular}} retrieved")
+ return m, nil
+}
+{{ end }}
+
+
+{{ if .IsRESTPutAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Update{{.CapsResourceNameSingular}}(id string, m *models.{{.CapsResourceNameSingular}}) (*models.{{.CapsResourceNameSingular}}, error) {
+ stmt, names := qb.Update("{{.SmallResourceNamePlural}}").Set(
+     {{range $k, $v := .Fields}}"{{ToLowerCamelCase $k}}",{{end}}
+ ).Where(qb.Eq("id")).ToCql()
+ err := gocqlx.Session.Query({{.SmallResourceNameSingular}}Dao.scyllaClient.Session, stmt, names).Bind(id).BindStruct(m).ExecRelease()
+ if err != nil {
+   return nil, err
+ }
+ log.Debugf("{{.SmallResourceNameSingular}} updated")
+ return m, nil
+}
+{{ end }}
+
+
+{{ if .IsRESTDeleteAllowed }}
+func ({{.SmallResourceNameSingular}}Dao *{{.CapsResourceNameSingular}}Dao) Delete{{.CapsResourceNameSingular}}(id string) error {
+ stmt, names := qb.Delete("{{.SmallResourceNamePlural}}").Where(qb.Eq("id")).ToCql()
+ err := gocqlx.Session.Query({{.SmallResourceNameSingular}}Dao.scyllaClient.Session, stmt, names).Bind(id).ExecRelease()
+ if err != nil {
+   return err
+ }
+ log.Debugf("{{.SmallResourceNameSingular}} deleted")
+ return nil
+}
+{{ end }}
